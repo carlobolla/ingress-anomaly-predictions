@@ -1,0 +1,5 @@
+export {default as Home} from './home'
+export {default as Predict} from './predict'
+export {default as Leaderboard} from './leaderboard'
+export {default as Admin} from './admin'
+export {default as NotFound} from './not_found'
