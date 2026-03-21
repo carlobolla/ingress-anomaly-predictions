@@ -17,7 +17,7 @@ interface Props {
 }
 
 const RegionList = ({ region, events, onPredictionChange, predictions, subtext, readonly }: Props) => {
-    const date = events[0].start_time;
+    //const date = events[0].start_time;
     return (
         <Card>
             <CardHeader>

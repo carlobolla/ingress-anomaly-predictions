@@ -2,7 +2,6 @@ import { cn, Divider, Slider, Tooltip } from '@heroui/react';
 import { useState, useEffect, useMemo } from 'react';
 import { Event, PredictionData } from '../../types';
 import { LockClosedIcon } from '@heroicons/react/16/solid';
-import useMediaQuery from '../../hooks/use_media_query';
 import dayjs from 'dayjs';
 
 
