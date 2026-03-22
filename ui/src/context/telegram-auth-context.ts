@@ -7,6 +7,7 @@ interface AuthContextType {
     logout: () => void;
     handleTelegramResponse: (response: TelegramResponse) => Promise<void>;
     verifyAuth: () => Promise<boolean>;
+    updateUser: (updated: Partial<User>) => void;
 }
 
 const defaultContext: AuthContextType = {
@@ -14,7 +15,8 @@ const defaultContext: AuthContextType = {
   isAuthenticated: false,
   logout: () => {},
   handleTelegramResponse: async () => {},
-  verifyAuth: async () => false
+  verifyAuth: async () => false,
+  updateUser: () => {}
 };
 
 const TelegramAuthContext = createContext<AuthContextType>(defaultContext)

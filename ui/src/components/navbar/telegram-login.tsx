@@ -1,9 +1,12 @@
 import { useEffect } from "react";
-import { Avatar, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks";
+import UserAvatar from "./user-avatar";
 
 const TelegramLogin = () => {
-    const { logout, user, isAuthenticated, handleTelegramResponse } = useAuth();
+    const { logout, isAuthenticated, handleTelegramResponse } = useAuth();
+    const navigate = useNavigate();
     useEffect(() => {
         (window as any).onTelegramAuth = handleTelegramResponse;
 
@@ -26,13 +29,13 @@ const TelegramLogin = () => {
             {isAuthenticated ? (
                 <Popover placement="bottom" showArrow={true}>
                     <PopoverTrigger>
-                        <div className="cursor-pointer flex gap-3 items-center">
-                            <Avatar size="sm" isBordered color="success" src={user?.photo_url} />
-                            {user?.first_name}
-                        </div>
+                        <UserAvatar size="sm" />
                     </PopoverTrigger>
                     <PopoverContent>
                         <Listbox aria-label="Actions">
+                            <ListboxItem onPress={() => navigate('/profile')} key="profile">
+                                Profile
+                            </ListboxItem>
                             <ListboxItem onPress={logout} key="logout" className="text-danger" color="danger">
                                 Logout
                             </ListboxItem>

@@ -5,6 +5,7 @@ import eventsRouter from './routes/events';
 import seriesRouter from './routes/series';
 import authRouter from './routes/auth';
 import predictionsRouter from './routes/predictions';
+import usersRouter from './routes/users';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use('/events', eventsRouter);
 app.use('/series', seriesRouter);
 app.use('/auth', authRouter);
 app.use('/predictions', predictionsRouter);
+app.use('/users', usersRouter);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

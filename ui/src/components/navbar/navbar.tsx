@@ -16,6 +16,7 @@ const SiteNavbar = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarLink text="Home" href="/" />
         <NavbarLink text="Leaderboard" href="/leaderboard" />
+        <NavbarLink text="Scoring" href="/scoring" />
       </NavbarContent>
       <NavbarContent justify="end">
         <TelegramLogin />

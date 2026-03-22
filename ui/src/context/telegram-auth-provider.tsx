@@ -80,14 +80,28 @@ const TelegramAuthProvider = ({ children }: { children: ReactNode }) => {
         navigate('/');
     };
 
+    const updateUser = (updated: Partial<User>) => {
+        setUser(prev => {
+            if (!prev) return prev;
+            const next = { ...prev, ...updated };
+            const auth = sessionStorage.getItem('auth');
+            if (auth) {
+                const parsed = JSON.parse(auth);
+                sessionStorage.setItem('auth', JSON.stringify({ ...parsed, user: next }));
+            }
+            return next;
+        });
+    };
+
     return (
-        <TelegramAuthContext.Provider 
+        <TelegramAuthContext.Provider
             value={{
                 user,
                 isAuthenticated,
                 logout,
                 handleTelegramResponse,
-                verifyAuth
+                verifyAuth,
+                updateUser
             }}
         >
             {children}
