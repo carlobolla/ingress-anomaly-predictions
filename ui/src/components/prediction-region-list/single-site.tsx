@@ -19,7 +19,7 @@ const SingleSite = ({ event, last, onPredictionChange, predictionData, readonly,
     const isReadonly = useMemo(() => readonly(event), [readonly, event]);
 
     useEffect(() => {
-        onPredictionChange(event.id, { winner: faction === 50 ? undefined : faction === 0 ? 'ENL' : 'RES' });
+        onPredictionChange(event.id, { winner: faction === 50 ? null : faction === 0 ? 'ENL' : 'RES' });
     }, [faction, onPredictionChange, event.id]);
 
     const thumbClass = faction === 50 ? 'bg-foreground' : faction > 50 ? 'bg-res' : 'bg-enl';

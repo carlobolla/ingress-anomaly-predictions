@@ -1,5 +1,5 @@
 export interface PredictionData {
-    winner?: string,
+    winner?: string | null,
     enl_score?: number,
     res_score?: number,
 }

@@ -4,7 +4,7 @@ import Event from '../types/event';
 
 const router = Router();
 
-// GET /events
+// GET /events - get all events, ordered by start_time desc
 router.get('/', async (_req: Request, res: Response) => {
     const { data, error } = await supabase
         .from('event')
@@ -15,7 +15,7 @@ router.get('/', async (_req: Request, res: Response) => {
     return res.json(data);
 });
 
-// GET /events/series/:series
+// GET /events/series/:series - get events for a series, ordered by start_time asc
 router.get('/series/:series', async (req: Request, res: Response) => {
     const { data, error } = await supabase
         .from('event')

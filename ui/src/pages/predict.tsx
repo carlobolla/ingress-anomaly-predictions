@@ -3,10 +3,10 @@ import { Navbar } from '../components';
 import { Alert, Button, CloseButton, Modal, Skeleton } from '@heroui/react';
 import { useParams } from 'react-router';
 import { Event, PredictionData, EventType, Prediction, Series } from '../types';
-import dayjs from 'dayjs';
 import api from '../api/axios';
 import { EventTypeString } from '../types/event';
 import EventsContainer from '../components/events-container';
+import { isPastCutoff } from '../utils/cutoff';
 
 const Predict = () => {
     const params = useParams();
@@ -36,22 +36,8 @@ const Predict = () => {
     }, [params.seriesId]);
 
     const handlePredictionChange = useCallback((id: number, predictionData: PredictionData) => {
-        console.log(`Prediction for event ${id} has been updated:`, predictionData);
         setPredictionData((prev) => ({ ...prev, [id]: predictionData }));
     }, []);
-
-    const isPastCutoff = (event: Event) => {
-        switch (event.type) {
-            case EventType.globalchallenge:
-                return dayjs(event.end_time).subtract(15, 'days') < dayjs();
-            case EventType.anomaly:
-                return dayjs(event.start_time).subtract(24, 'days') < dayjs();
-            case EventType.skirmish:
-                return dayjs(event.start_time).subtract(24, 'hours') < dayjs();
-            default:
-                return dayjs(event.start_time).subtract(24, 'hours') < dayjs();
-        };
-    }
 
     const savePrediction = async () => {
         try {

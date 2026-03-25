@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import supabase from '../db/supabase';
-import { PredictionInput } from '../types/prediction';
+import { PredictionInput, Winner } from '../types/prediction';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
@@ -61,7 +61,7 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
         .map((p) => ({
             event: p.event,
             user: userId,
-            winner: p.winner,
+            winner: p.winner ?? null,
             enl_score: p.enl_score,
             res_score: p.res_score,
         }));

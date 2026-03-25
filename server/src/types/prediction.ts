@@ -1,12 +1,12 @@
-export enum Winner{
-    ENL,
-    RES
+export enum Winner {
+    ENL = 'ENL',
+    RES = 'RES',
 }
 
 export default interface Prediction {
     id: number;
     event_id: number;
-    winner: Winner;
+    winner?: Winner | null;
     enl_score: number;
     res_score: number;
     created_at: Date;
@@ -16,7 +16,7 @@ export default interface Prediction {
 }
 
 export interface PredictionInput {
-    winner?: Winner;
+    winner?: Winner | null;
     enl_score: number;
     res_score: number;
 }

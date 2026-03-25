@@ -1,7 +1,8 @@
 import { Winner } from "./prediction";
 
 export enum EventType {
-    anomaly = 1,
+    series,
+    anomaly,
     globalchallenge,
     skirmish,
 }

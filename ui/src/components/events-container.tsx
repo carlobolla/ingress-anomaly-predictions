@@ -1,9 +1,10 @@
 import { EventType, Event, PredictionData, Region } from "../types";
-import RegionList from "./faction-only-prediction/region-list";
+import RegionList from "./prediction-region-list/region-list";
 import dayjs from "dayjs";
-import PercentagePrediction from "./percentage-prediction/percentage-prediction";
+import PercentagePrediction from "./prediction-percentage/percentage-prediction";
 import useMediaQuery from "../hooks/use_media_query";
-import { WarningIcon } from "@heroui/react";
+import { FactionOnly } from ".";
+import { isPastCutoff } from "../utils/cutoff";
 
 type EventsContainerProps = {
     events: Event[];
@@ -14,7 +15,7 @@ type EventsContainerProps = {
 
 const EventsContainer = ({ events, type, handlePredictionChange, predictionData }: EventsContainerProps ) => {
     const mediaQuery = useMediaQuery('(min-width: 1024px)');
-    
+
     const groupEventsByRegion = (events: Event[]) => {
         return events.reduce((acc, event) => {
             if (!acc[event.region]) {
@@ -28,12 +29,34 @@ const EventsContainer = ({ events, type, handlePredictionChange, predictionData 
     return (
             (() => {
                 switch(type) {
+                    case EventType.series:
+                        return (
+                            <>
+                                <div className="mb-5">
+                                    <p className="text-slate-400 flex items-center gap-2">
+                                        Predict the winning faction for the series!
+                                    </p>
+                                </div>
+                                <div className={mediaQuery ? "grid grid-cols-3 gap-4 w-full" : "grid grid-cols-1 gap-4 w-full"}>
+                                    {...events.map((event: Event) => (
+                                        <FactionOnly
+                                            key={event.id}
+                                            event={event}
+                                            onPredictionChange={handlePredictionChange}
+                                            prediction={predictionData ? predictionData[event.id] : undefined}
+                                            readonly={isPastCutoff}
+                                            showEndTime
+                                        />
+                                    ))}
+                                </div>
+                            </>
+
+                        );
                     case EventType.anomaly:
                         return (
                             <>
                                 <div className="mb-5">
                                     <p className="text-slate-400 flex items-center gap-2">
-                                        <WarningIcon className="size-5" />
                                         A cancellation will result in no points for your prediction.
                                         Cutoff date for predictions is 24 hours before the event starts.
                                     </p>
@@ -45,7 +68,7 @@ const EventsContainer = ({ events, type, handlePredictionChange, predictionData 
                                             event={event}
                                             onPredictionChange={handlePredictionChange}
                                             prediction={predictionData ? predictionData[event.id] : undefined}
-                                            readonly={(event: Event) => dayjs(event.start_time).subtract(24, 'days') < dayjs()}
+                                            readonly={isPastCutoff}
                                         />
                                     ))}
                                 </div>
@@ -66,7 +89,7 @@ const EventsContainer = ({ events, type, handlePredictionChange, predictionData 
                                                     .map(event => [event.id, predictionData![event.id] as PredictionData])
                                             )}
                                             subtext="A draw or cancellation will result in no points for your prediction. Cutoff date for predictions is 24 days before the event starts."
-                                            readonly={(event: Event) => dayjs(event.start_time).subtract(24, 'days') < dayjs()}
+                                            readonly={isPastCutoff}
                                         />
                                     </div>
                                 ))}
@@ -74,19 +97,27 @@ const EventsContainer = ({ events, type, handlePredictionChange, predictionData 
                         );
                     case EventType.globalchallenge:
                         return (
-                            <div className={mediaQuery ? "grid grid-cols-3 gap-4 w-full" : "grid grid-cols-1 gap-4 w-full"}>
-                                {[...events].sort((a, b) => dayjs(a.start_time).unix() - dayjs(b.start_time).unix()).map((event: Event) => (
-                                    <PercentagePrediction
-                                        key={event.id}
-                                        event={event}
-                                        onPredictionChange={handlePredictionChange}
-                                        prediction={predictionData ? predictionData[event.id] : undefined}
-                                        readonly={(event: Event) => dayjs(event.end_time).subtract(15, 'days') < dayjs()}
-                                        showEndTime
-                                        range={[40, 60]}
-                                    />
-                                ))}
-                            </div>
+                            <>
+                                <div className="mb-5">
+                                    <p className="text-slate-400 flex items-center gap-2">
+                                        Cutoff date for predictions is 15 days before the event ends.
+                                        Limited to the range of 40-60%.
+                                    </p>
+                                </div>
+                                <div className={mediaQuery ? "grid grid-cols-3 gap-4 w-full" : "grid grid-cols-1 gap-4 w-full"}>
+                                    {[...events].sort((a, b) => dayjs(a.start_time).unix() - dayjs(b.start_time).unix()).map((event: Event) => (
+                                        <PercentagePrediction
+                                            key={event.id}
+                                            event={event}
+                                            onPredictionChange={handlePredictionChange}
+                                            prediction={predictionData ? predictionData[event.id] : undefined}
+                                            readonly={isPastCutoff}
+                                            showEndTime
+                                            range={[40, 60]}
+                                        />
+                                    ))}
+                                </div>
+                            </>
                         );
                     default:
                         return null;

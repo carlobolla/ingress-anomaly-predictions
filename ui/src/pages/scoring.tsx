@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { Navbar } from "../components"
 
 const Scoring = () => {
@@ -9,17 +10,25 @@ const Scoring = () => {
                 <p className="text-foreground/60 mb-8">Everything you need to know to maximise your score</p>
 
                 <section className="mb-10">
-                    <h2 className="text-xl font-semibold mb-3">Three types of events</h2>
-                    <p className="text-foreground/70 text-sm mb-4">
-                        Not all predictions are equal. Anomalies are the hardest to call accurately and worth the most.
-                        Minor events are simple but frequent, so they add up.
-                    </p>
+                    <h2 className="text-xl font-semibold mb-3">Four types of events</h2>
                     <div className="space-y-3">
                         <div className="rounded-lg border border-foreground/10 p-4">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
+                                    <p className="font-semibold">Series Winner</p>
+                                    <p className="text-foreground/60 text-sm mt-1">Pick which faction wins the overall series. One prediction per series, scored at the end. No partial credit.</p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="font-mono font-semibold">50 pts</p>
+                                    <p className="text-foreground/40 text-xs">or 0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="rounded-lg border border-foreground/10 p-4">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
                                     <p className="font-semibold">Anomaly</p>
-                                    <p className="text-foreground/60 text-sm mt-1">Predict the faction score split (e.g. "ENL 58% - RES 42%") and which side wins. The closer your split is to reality, the more points you earn.</p>
+                                    <p className="text-foreground/60 text-sm mt-1">Predict the score split between ENL and RES. The closer your split is to the real result, the more points you earn. Tolerance window: ±20%.</p>
                                 </div>
                                 <div className="text-right shrink-0">
                                     <p className="text-success font-mono font-semibold">120 pts</p>
@@ -31,7 +40,7 @@ const Scoring = () => {
                             <div className="flex items-start justify-between gap-4">
                                 <div>
                                     <p className="font-semibold">Global Challenge</p>
-                                    <p className="text-foreground/60 text-sm mt-1">Same format as an Anomaly: percentage split plus faction winner. These tend to finish very close to 50/50, so you need to be precise to score well.</p>
+                                    <p className="text-foreground/60 text-sm mt-1">Same format, but these events tend to finish very close to 50/50. You need to be precise to score well. Tolerance window: ±5%.</p>
                                 </div>
                                 <div className="text-right shrink-0">
                                     <p className="text-success font-mono font-semibold">72 pts</p>
@@ -43,7 +52,7 @@ const Scoring = () => {
                             <div className="flex items-start justify-between gap-4">
                                 <div>
                                     <p className="font-semibold">Minor Event</p>
-                                    <p className="text-foreground/60 text-sm mt-1">Just pick the winning faction. No percentages: it's a straightforward call. There are a lot of these per series, so don't skip them.</p>
+                                    <p className="text-foreground/60 text-sm mt-1">Just pick the winning faction. No percentages. There are a lot of these per series: don't skip them!</p>
                                 </div>
                                 <div className="text-right shrink-0">
                                     <p className="font-mono font-semibold">15 pts</p>
@@ -55,108 +64,132 @@ const Scoring = () => {
                 </section>
 
                 <section className="mb-10">
-                    <h2 className="text-xl font-semibold mb-3">How percentage predictions are scored</h2>
-                    <p className="text-foreground/70 text-sm mb-4">
-                        For Anomalies and Global Challenges, you predict what percentage each faction scores.
-                        You start with full points for a perfect guess and lose points as your guess drifts further from the real result.
-                        Go too far off and you score nothing.
+                    <h2 className="text-xl font-semibold mb-3">Anomaly scoring</h2>
+                    <p className="text-foreground/70 text-sm mb-2">
+                        Your base score scales linearly with accuracy: spot on gives 100 points, and you lose 5 points for every 1% you're off.
+                        Miss by 20% or more and you score nothing.
+                    </p>
+                    <p className="text-foreground/70 text-sm mb-5">
+                        Predict the faction with more than 50% and you've implicitly predicted the winner too.
+                        If that faction actually won, you get a <span className="text-foreground font-semibold">×1.2 bonus</span> on top.
+                        Get the split exactly right and the winner bonus is automatic; there's no way to nail the split without also calling the right winner.
                     </p>
 
-                    <div className="space-y-6">
-                        {/* Anomaly */}
-                        <div>
-                            <p className="font-semibold mb-1">Anomaly - tolerance window: ±20%</p>
-                            <p className="text-foreground/60 text-sm mb-3">
-                                You have more room to be wrong here. Being off by 10% still gets you half the points.
-                            </p>
-                            <div className="overflow-x-auto rounded-lg border border-foreground/10">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-foreground/5 text-foreground/60">
-                                        <tr>
-                                            <th className="text-left px-4 py-2.5 font-medium">How far off your guess was</th>
-                                            <th className="text-right px-4 py-2.5 font-medium">Points</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-foreground/10">
-                                        {[
-                                            { dev: "Spot on", pts: "100" },
-                                            { dev: "5% off", pts: "75" },
-                                            { dev: "10% off", pts: "50" },
-                                            { dev: "15% off", pts: "25" },
-                                            { dev: "20% off or more", pts: "0" },
-                                        ].map((row) => (
-                                            <tr key={row.dev}>
-                                                <td className="px-4 py-2.5">{row.dev}</td>
-                                                <td className="px-4 py-2.5 text-right font-mono text-foreground/60">{row.pts}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div className="rounded-lg border border-foreground/10 overflow-hidden mb-4">
+                        <div className="px-4 py-3 bg-foreground/5 border-b border-foreground/10">
+                            <p className="text-sm font-medium">Example - real result: <span className="text-enl-foreground font-mono">ENL 62%</span> - <span className="text-res-foreground font-mono">38% RES</span></p>
                         </div>
-
-                        <div>
-                            <p className="font-semibold mb-1">Global Challenge - tolerance window: ±5%</p>
-                            <p className="text-foreground/60 text-sm mb-3">
-                                Much tighter. A 3% miss already costs you more than half your points, so vague guesses won't score.
-                            </p>
-                            <div className="overflow-x-auto rounded-lg border border-foreground/10">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-foreground/5 text-foreground/60">
-                                        <tr>
-                                            <th className="text-left px-4 py-2.5 font-medium">How far off your guess was</th>
-                                            <th className="text-right px-4 py-2.5 font-medium">Points</th>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-foreground/5 text-foreground/60">
+                                    <tr>
+                                        <th className="text-left px-4 py-2.5 font-medium">Your prediction</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Off by</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Base</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Faction</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-foreground/10">
+                                    {[
+                                        { pred: "ENL 62%", off: "0%", base: "100", faction: "✓ automatic", total: "120", highlight: true },
+                                        { pred: "ENL 57%", off: "5%", base: "75", faction: "✓ ENL wins", total: "90", highlight: false },
+                                        { pred: "RES 56%", off: "18%", base: "10", faction: "✗ predicted RES", total: "10", highlight: false },
+                                        { pred: "RES 60%", off: "22%", base: "-", faction: "-", total: "0", highlight: false },
+                                    ].map((row) => (
+                                        <tr key={row.pred} className={row.highlight ? "bg-success/5" : ""}>
+                                            <td className="px-4 py-2.5 font-mono">{row.pred}</td>
+                                            <td className="px-4 py-2.5 text-right text-foreground/60">{row.off}</td>
+                                            <td className="px-4 py-2.5 text-right font-mono text-foreground/60">{row.base}</td>
+                                            <td className="px-4 py-2.5 text-right text-foreground/60 text-xs">{row.faction}</td>
+                                            <td className={`px-4 py-2.5 text-right font-mono font-semibold ${row.highlight ? "text-success" : ""}`}>{row.total}</td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-foreground/10">
-                                        {[
-                                            { dev: "Spot on", pts: "60" },
-                                            { dev: "1% off", pts: "48" },
-                                            { dev: "2.5% off", pts: "30" },
-                                            { dev: "4% off", pts: "12" },
-                                            { dev: "5% off or more", pts: "0" },
-                                        ].map((row) => (
-                                            <tr key={row.dev}>
-                                                <td className="px-4 py-2.5">{row.dev}</td>
-                                                <td className="px-4 py-2.5 text-right font-mono text-foreground/60">{row.pts}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
+                        <p className="px-4 py-3 text-xs text-foreground/40 border-t border-foreground/10">
+                            RES 56% is within the ±20% window but predicts RES as the winner: the faction bonus is lost even though accuracy still scores.
+                        </p>
                     </div>
                 </section>
 
                 <section className="mb-10">
-                    <h2 className="text-xl font-semibold mb-3">The faction winner bonus</h2>
-                    <p className="text-foreground/70 text-sm mb-3">
-                        Getting the winning faction right earns you a <span className="text-foreground font-semibold">+20% bonus</span> on top of whatever your percentage accuracy scored.
-                        This is extra reward, not a penalty: if you called the wrong winner but your percentage was accurate, you still keep those points.
+                    <h2 className="text-xl font-semibold mb-3">Global Challenge scoring</h2>
+                    <p className="text-foreground/70 text-sm mb-2">
+                        Same principle, but the tolerance window shrinks to ±5% and the base score drops faster: you lose 12 points per 1% deviation.
+                        Global Challenges typically end very close to 50/50, which makes the faction call especially dangerous.
                     </p>
-                    <p className="text-foreground/70 text-sm">
-                        One catch: if your percentage is too far off (outside the tolerance window), you score zero no matter what, even if you called the right winner.
-                        Accuracy comes first.
+                    <p className="text-foreground/70 text-sm mb-5">
+                        Being just a few percent off on the wrong side of 50% means you lose the winner bonus entirely, even if your raw accuracy would still score something.
                     </p>
+
+                    <div className="rounded-lg border border-foreground/10 overflow-hidden mb-4">
+                        <div className="px-4 py-3 bg-foreground/5 border-b border-foreground/10">
+                            <p className="text-sm font-medium">Example - real result: <span className="text-enl-foreground font-mono">ENL 51%</span> - <span className="text-res-foreground font-mono">49% RES</span></p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-foreground/5 text-foreground/60">
+                                    <tr>
+                                        <th className="text-left px-4 py-2.5 font-medium">Your prediction</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Off by</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Base</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Faction</th>
+                                        <th className="text-right px-4 py-2.5 font-medium">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-foreground/10">
+                                    {[
+                                        { pred: "ENL 51%", off: "0%", base: "60", faction: "✓ automatic", total: "72", highlight: true },
+                                        { pred: "ENL 53%", off: "2%", base: "36", faction: "✓ ENL wins", total: "43", highlight: false },
+                                        { pred: "RES 52%", off: "3%", base: "24", faction: "✗ predicted RES", total: "24", highlight: false },
+                                        { pred: "RES 55%", off: "6%", base: "-", faction: "-", total: "0", highlight: false },
+                                    ].map((row) => (
+                                        <tr key={row.pred} className={row.highlight ? "bg-success/5" : ""}>
+                                            <td className="px-4 py-2.5 font-mono">{row.pred}</td>
+                                            <td className="px-4 py-2.5 text-right text-foreground/60">{row.off}</td>
+                                            <td className="px-4 py-2.5 text-right font-mono text-foreground/60">{row.base}</td>
+                                            <td className="px-4 py-2.5 text-right text-foreground/60 text-xs">{row.faction}</td>
+                                            <td className={`px-4 py-2.5 text-right font-mono font-semibold ${row.highlight ? "text-success" : ""}`}>{row.total}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="px-4 py-3 text-xs text-foreground/40 border-t border-foreground/10">
+                            RES 52% is only 3% off but predicts RES wins. Missing the faction bonus on a close-to-50/50 result is a common way to leave points on the table.
+                        </p>
+                    </div>
                 </section>
 
                 <section className="mb-10">
                     <h2 className="text-xl font-semibold mb-3">What actually moves the leaderboard</h2>
-                    <p className="text-foreground/70 text-sm mb-3">
-                        Anomalies carry the most weight per event by far with up to 120 points each, with a wide enough tolerance window that a near-miss still scores something.
-                        They're the events where a strong prediction can open a big gap over the competition.
-                    </p>
-                    <p className="text-foreground/70 text-sm mb-3">
-                        Global Challenges are fewer and worth less, but the tight ±5% window makes them a real skill test.
-                        A precise call here can quietly separate you from players who just guess roughly.
-                    </p>
-                    <p className="text-foreground/70 text-sm">
-                        Minor events are only 15 points each, but there are a lot of them.
-                        Consistently picking them up across a series adds up to a meaningful chunk of your total, enough that ignoring them is a real disadvantage, even for players who ace every Anomaly.
-                    </p>
+                    <div className="space-y-3">
+                        <div className="rounded-lg border border-foreground/10 p-4">
+                            <p className="font-semibold mb-1">Anomalies</p>
+                            <p className="text-foreground/60 text-sm">Up to 120 points each, with a forgiving ±20% window. A near-miss still scores, and a strong call opens a real gap over the competition.</p>
+                        </div>
+                        <div className="rounded-lg border border-foreground/10 p-4">
+                            <p className="font-semibold mb-1">Global Challenges</p>
+                            <p className="text-foreground/60 text-sm">Fewer events, lower ceiling, but the ±5% window punishes vague guesses. Being precise here separates serious players from those who just pick roughly.</p>
+                        </div>
+                        <div className="rounded-lg border border-foreground/10 p-4">
+                            <p className="font-semibold mb-1">Minor Events</p>
+                            <p className="text-foreground/60 text-sm">Only 15 points each, but there are many per series. Skipping them is a real disadvantage, even for someone who aces every Anomaly.</p>
+                        </div>
+                    </div>
                 </section>
 
-
+                <section className="mb-10 space-y-3">
+                    <h2 className="text-xl font-semibold mb-3">Tips</h2>
+                    <div className="rounded-lg border border-foreground/10 p-4 text-sm text-foreground/70">
+                        Double-click any slider to reset it to the centre (50/50 or no faction selected).
+                    </div>
+                    <div className="rounded-lg border border-foreground/10 p-4 text-sm text-foreground/70">
+                        Set your own Faction in the <Link to="/profile" className="text-blue-500 hover:underline">Profile</Link> page. This doesn't affect your predictions, but it does add a coloured badge next to your name on the leaderboard.
+                    </div>
+                </section>
             </div>
         </>
     )

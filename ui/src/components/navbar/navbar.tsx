@@ -2,15 +2,17 @@ import { useState } from 'react';
 import { TelegramLogin } from '../'
 import { NavbarLink } from "..";
 import { Link } from "react-router";
+import { useAuth } from '../../hooks';
 
 const NAV_LINKS = [
   { text: 'Home', href: '/' },
-  { text: 'Leaderboard', href: '/leaderboard' },
+  { text: 'Leaderboard', href: '/leaderboard', authRequired: true },
   { text: 'Scoring', href: '/scoring' },
 ];
 
 const SiteNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <nav className="w-full border-b border-separator bg-background/70">
@@ -35,7 +37,7 @@ const SiteNavbar = () => {
           <Link to="/"><p className="font-bold text-white">@IUENG</p></Link>
         </div>
         <ul className="hidden sm:flex items-center gap-4">
-          {NAV_LINKS.map(link => <NavbarLink key={link.href} text={link.text} href={link.href} />)}
+          {NAV_LINKS.map(link => { return link.authRequired ? isAuthenticated && <NavbarLink key={link.href} text={link.text} href={link.href} /> : <NavbarLink key={link.href} text={link.text} href={link.href} />; })}
         </ul>
         <div>
           <TelegramLogin />
@@ -48,7 +50,7 @@ const SiteNavbar = () => {
         aria-hidden={!menuOpen}
       >
         <ul className="flex flex-col px-6 py-3 overflow-hidden" onClick={() => setMenuOpen(false)}>
-          {NAV_LINKS.map(link => <NavbarLink key={link.href} text={link.text} href={link.href} />)}
+          {NAV_LINKS.map(link => { return link.authRequired ? isAuthenticated && <NavbarLink key={link.href} text={link.text} href={link.href} /> : <NavbarLink key={link.href} text={link.text} href={link.href} />; })}
         </ul>
       </div>
     </nav>
