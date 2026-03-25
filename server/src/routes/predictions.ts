@@ -5,8 +5,8 @@ import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
-// GET /predictions/:series — get own predictions for a series
-router.get('/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+// GET /predictions/series/:series — get own predictions for a series
+router.get('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -24,24 +24,9 @@ router.get('/:series', authenticate, async (req: AuthenticatedRequest, res: Resp
     return res.json(normalized);
 });
 
-// GET /predictions/all/:series — get all users' predictions for a series
-router.get('/all/:series', async (req: Request, res: Response) => {
-    const { series } = req.params;
-    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
-
-    const { data, error } = await supabase
-        .from('prediction')
-        .select('*, event!inner(id, series)')
-        .eq('event.series', series);
-
-    if (error) return res.status(500).json({ error: error.message });
-    const normalized = data.map(p => ({ ...p, event: (p.event as { id: number }).id }));
-    return res.json(normalized);
-});
-
-// POST /predictions/:id — upsert predictions for events in a series
+// POST /predictions/series/:series — upsert predictions for events in a series
 // Body: array of { event, winner, enl_score, res_score }
-router.post('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -131,7 +116,7 @@ router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response
     return res.json(data);
 });
 
-// DELETE /predictions/:id — delete own prediction
+// DELETE /predictions/series/:id — delete own prediction
 router.delete('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
