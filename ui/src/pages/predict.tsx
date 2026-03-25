@@ -22,8 +22,8 @@ const Predict = () => {
     useEffect(() => {
         const initialize = async () => {
             const [predictionsRes, eventsRes, seriesRes] = await Promise.all([
-                api.get('/predictions', { params: { series: params.seriesId } }),
-                api.get('/events', { params: { series: params.seriesId } }),
+                api.get(`/predictions/series/${params.seriesId}`),
+                api.get(`/events/series/${params.seriesId}`),
                 api.get(`/series/${params.seriesId}`),
             ]);
             const existingPredictions: Prediction[] = predictionsRes.data;
@@ -67,11 +67,11 @@ const Predict = () => {
 
             if (newEntries.length > 0) {
                 const body = newEntries.map(([eventId, data]) => ({ event: Number(eventId), ...data }));
-                requests.push(api.post('/predictions', body, { params: { series: params.seriesId } }));
+                requests.push(api.post(`/predictions/series/${params.seriesId}`, body));
             }
 
             for (const [eventId, data] of existingEntries) {
-                requests.push(api.put('/predictions', data, { params: { id: existingPredictionIds[Number(eventId)] } }));
+                requests.push(api.put(`/predictions/${existingPredictionIds[Number(eventId)]}`, data));
             }
 
             await Promise.all(requests);
