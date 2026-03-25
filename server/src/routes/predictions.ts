@@ -1,28 +1,17 @@
 import { Router, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import supabase from '../db/supabase';
 import { PredictionInput } from '../types/prediction';
+import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
-function getUserId(req: Request): string | null {
-    const auth = req.headers.authorization;
-    if (!auth?.startsWith('Bearer ')) return null;
-    try {
-        const payload = jwt.verify(auth.slice(7), process.env.JWT_SECRET!) as { sub: string };
-        return payload.sub;
-    } catch {
-        return null;
-    }
-}
-
-// GET /predictions?series=1 — get authenticated user's predictions for a series
-router.get('/', async (req: Request, res: Response) => {
-    const userId = getUserId(req);
+// GET /predictions/:series — get own predictions for a series
+router.get('/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { series } = req.query;
-    if (!series) return res.status(400).json({ error: 'Missing query param: series' });
+    const { series } = req.params;
+    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
 
     const { data, error } = await supabase
         .from('prediction')
@@ -35,10 +24,10 @@ router.get('/', async (req: Request, res: Response) => {
     return res.json(normalized);
 });
 
-// GET /predictions/all?series=1 — get all users' predictions for a series
-router.get('/all', async (req: Request, res: Response) => {
-    const { series } = req.query;
-    if (!series) return res.status(400).json({ error: 'Missing query param: series' });
+// GET /predictions/all/:series — get all users' predictions for a series
+router.get('/all/:series', async (req: Request, res: Response) => {
+    const { series } = req.params;
+    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
 
     const { data, error } = await supabase
         .from('prediction')
@@ -50,14 +39,14 @@ router.get('/all', async (req: Request, res: Response) => {
     return res.json(normalized);
 });
 
-// POST /predictions?series=1 — upsert predictions for events in a series
+// POST /predictions/:id — upsert predictions for events in a series
 // Body: array of { event, winner, enl_score, res_score }
-router.post('/', async (req: Request, res: Response) => {
-    const userId = getUserId(req);
+router.post('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { series } = req.query;
-    if (!series) return res.status(400).json({ error: 'Missing query param: series' });
+    const { series } = req.params;
+    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
 
     const inputs: (PredictionInput & { event: number })[] = req.body;
     if (!Array.isArray(inputs) || inputs.length === 0) {
@@ -105,13 +94,13 @@ router.post('/', async (req: Request, res: Response) => {
     return res.status(201).json(data);
 });
 
-// PUT /predictions?id=1 — update own prediction
-router.put('/', async (req: Request, res: Response) => {
-    const userId = getUserId(req);
+// PUT /predictions/:id — update own prediction
+router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: 'Missing query param: id' });
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Missing route param: id' });
 
     const body: Partial<PredictionInput> = req.body;
 
@@ -142,13 +131,13 @@ router.put('/', async (req: Request, res: Response) => {
     return res.json(data);
 });
 
-// DELETE /predictions?id=1 — delete own prediction
-router.delete('/', async (req: Request, res: Response) => {
-    const userId = getUserId(req);
+// DELETE /predictions/:id — delete own prediction
+router.delete('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: 'Missing query param: id' });
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Missing route param: id' });
 
     const { error } = await supabase
         .from('prediction')

@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router";
 import { Series } from "../types";
-import { Button, Card, CardBody, CardFooter, Image, Skeleton } from "@heroui/react";
+import { Button, Card, Skeleton } from "@heroui/react";
 import PlaceholderImg from '../assets/placeholder.jpg';
+import { useAuth } from "../hooks";
 
 interface Props {
     series: Series;
@@ -10,48 +11,47 @@ interface Props {
 
 const SeriesCard = ({ series, skeleton }: Props) => {
     const navigate = useNavigate();
+    const {isAuthenticated} = useAuth();
     if (skeleton) {
         return (
             <Card className="p-3">
-            <CardBody className="overflow-visible py-2">
-                <Skeleton className="rounded-lg">
-                    <Image
-                        alt="Card background"
-                        className="object-cover rounded-xl"
-                        src={series.image ?? PlaceholderImg}
-                    />
-                </Skeleton>
-            </CardBody>
-            <CardFooter className="flex justify-between items-center">
-                <div>
-                    <Skeleton className="rounded-lg">
-                        <h2 className="text-xl font-semibold sm:font-3xl">{series.name} Series</h2>
-                    </Skeleton>
-                    <Skeleton className="rounded-lg">
-                        <p>{series.period}</p>
-                    </Skeleton>
-                </div>
-                <Button onPress={() => navigate(`/predict/${series.id}`)} color="primary" variant="solid">Predict results</Button>
-            </CardFooter>
-        </Card>
+                <Card.Content className="overflow-visible py-2">
+                    <Skeleton className="rounded-lg w-full h-48" />
+                </Card.Content>
+                <Card.Footer className="flex justify-between items-center">
+                    <div>
+                        <Skeleton className="rounded-lg h-7 w-40 mb-1" />
+                        <Skeleton className="rounded-lg h-5 w-24" />
+                    </div>
+                    <Skeleton className="rounded-lg h-10 w-32" />
+                </Card.Footer>
+            </Card>
         )
     }
     return (
-        <Card className="p-3">
-            <CardBody className="overflow-visible py-2">
-                <Image
+        <Card>
+            <Card.Header className="overflow-visible">
+                <img
                     alt="Card background"
-                    className="object-cover rounded-xl"
+                    className="object-cover rounded-xl w-full"
                     src={series.image ?? PlaceholderImg}
                 />
-            </CardBody>
-            <CardFooter className="flex justify-between items-center">
+            </Card.Header>
+            <Card.Content className="flex flex-row justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-semibold sm:font-3xl">{series.name} Series</h2>
-                    <p>{series.period}</p>
+                    <h2 className="font-semibold sm:text-lg">{series.name} Series</h2>
+                    <p className="text-sm">{series.period}</p>
                 </div>
-                <Button onPress={() => navigate(`/predict/${series.id}`)} color="primary" variant="solid">Predict results</Button>
-            </CardFooter>
+                <div>
+                    {isAuthenticated ? (
+                        <Button onPress={() => navigate(`/predict/${series.id}`)} variant="primary">
+                            Predict results
+                        </Button>
+                    ) : (
+                        <p className="text-muted text-sm">Sign in to predict</p>
+                    )}
+                </div>
+            </Card.Content>
         </Card>
     )
 }

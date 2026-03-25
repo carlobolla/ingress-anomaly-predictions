@@ -9,14 +9,14 @@ interface Event {
 }
 
 export enum EventType {
-    anomaly = 1,
-    globalchallenge,
+    globalchallenge = 1,
+    anomaly,
     skirmish,
 }
 
 export enum EventTypeString {
-    "Anomaly" = 1,
-    "Global Challenge",
+    "Global Challenge" = 1,
+    "Anomaly",
     "Skirmish",
 }
 

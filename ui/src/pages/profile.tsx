@@ -9,17 +9,17 @@ const factions = [
         key: "ENL",
         label: "Enlightened",
         description: "The Enlightened believe the Shapers are guiding humanity toward a new stage of evolution.",
-        color: "text-success",
-        border: "border-success",
-        bg: "bg-success/10",
+        color: "text-enl-foreground",
+        border: "border-enl",
+        bg: "bg-enl/10",
     },
     {
         key: "RES",
         label: "Resistance",
         description: "The Resistance fights to protect humanity's free will from the influence of the Shapers.",
-        color: "text-primary",
-        border: "border-primary",
-        bg: "bg-primary/10",
+        color: "text-res-foreground",
+        border: "border-res",
+        bg: "bg-res/10",
     },
 ] as const;
 
@@ -56,11 +56,10 @@ const Profile = () => {
 
                 <UserAvatar size="lg" />
 
-                {/* Faction selection */}
                 <div className="mb-6">
                     <p className="font-semibold mb-1">Faction</p>
                     <p className="text-foreground/60 text-sm mb-4">
-                        Your faction is shown on the leaderboard and used to track your prediction tendencies.
+                        Your faction is shown on the leaderboard.
                     </p>
                     <div className="space-y-3">
                         {factions.map((f) => {
@@ -91,9 +90,9 @@ const Profile = () => {
                 {error && <p className="text-danger text-sm mb-3">{error}</p>}
 
                 <Button
-                    color="primary"
+                    variant="primary"
                     isDisabled={!isDirty || !selected}
-                    isLoading={saving}
+                    isPending={saving}
                     onPress={handleSave}
                 >
                     {saved ? "Saved!" : "Save changes"}

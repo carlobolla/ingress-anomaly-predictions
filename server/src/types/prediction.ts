@@ -12,6 +12,7 @@ export default interface Prediction {
     created_at: Date;
     updated_at: Date;
     user: number;
+    score: number;
 }
 
 export interface PredictionInput {

@@ -1,4 +1,4 @@
-import { Navbar } from "@heroui/react";
+import { Navbar } from "../components";
 import { Link } from "react-router";
 
 const Admin = () => {

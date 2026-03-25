@@ -1,17 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from "react-router";
-import { HeroUIProvider } from '@heroui/react'
-import { useTheme } from '@heroui/use-theme';
 import { Home, Leaderboard, NotFound, Predict, Scoring, Profile } from './pages'
 import './index.css'
 import { TelegramAuthProvider } from './context';
 import { ProtectedRoute } from './components';
 
 export const App = () => {
-  const { theme } = useTheme();
   return (
-    <main className={`${theme} text-foreground bg-background`}>
+    <main className="dark text-foreground bg-background min-h-screen">
       <BrowserRouter>
         <TelegramAuthProvider>
           <Routes>
@@ -30,8 +27,6 @@ export const App = () => {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HeroUIProvider>
-      <App />
-    </HeroUIProvider>
+    <App />
   </StrictMode>
 )

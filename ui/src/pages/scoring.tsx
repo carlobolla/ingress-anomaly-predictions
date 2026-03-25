@@ -8,12 +8,11 @@ const Scoring = () => {
                 <h1 className="text-2xl font-semibold mb-1">How Scoring Works</h1>
                 <p className="text-foreground/60 mb-8">Everything you need to know to maximise your score</p>
 
-                {/* Three event types */}
                 <section className="mb-10">
                     <h2 className="text-xl font-semibold mb-3">Three types of events</h2>
                     <p className="text-foreground/70 text-sm mb-4">
                         Not all predictions are equal. Anomalies are the hardest to call accurately and worth the most.
-                        Minor events are simple but frequent, they add up.
+                        Minor events are simple but frequent, so they add up.
                     </p>
                     <div className="space-y-3">
                         <div className="rounded-lg border border-foreground/10 p-4">
@@ -55,7 +54,6 @@ const Scoring = () => {
                     </div>
                 </section>
 
-                {/* How the percentage scoring works */}
                 <section className="mb-10">
                     <h2 className="text-xl font-semibold mb-3">How percentage predictions are scored</h2>
                     <p className="text-foreground/70 text-sm mb-4">
@@ -97,7 +95,6 @@ const Scoring = () => {
                             </div>
                         </div>
 
-                        {/* Global Challenge */}
                         <div>
                             <p className="font-semibold mb-1">Global Challenge - tolerance window: ±5%</p>
                             <p className="text-foreground/60 text-sm mb-3">
@@ -131,7 +128,6 @@ const Scoring = () => {
                     </div>
                 </section>
 
-                {/* Faction bonus */}
                 <section className="mb-10">
                     <h2 className="text-xl font-semibold mb-3">The faction winner bonus</h2>
                     <p className="text-foreground/70 text-sm mb-3">
@@ -144,7 +140,6 @@ const Scoring = () => {
                     </p>
                 </section>
 
-                {/* What matters most */}
                 <section className="mb-10">
                     <h2 className="text-xl font-semibold mb-3">What actually moves the leaderboard</h2>
                     <p className="text-foreground/70 text-sm mb-3">

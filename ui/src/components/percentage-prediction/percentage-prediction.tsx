@@ -1,5 +1,5 @@
 import { LockClosedIcon } from '@heroicons/react/24/solid';
-import { Card, CardBody, CardHeader, cn, Slider, Tooltip } from '@heroui/react';
+import { Card, Slider, Tooltip } from '@heroui/react';
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat'
@@ -15,9 +15,10 @@ interface Props {
     readonly: (event: Event) => boolean;
     prediction?: PredictionData;
     showEndTime?: boolean;
+    range?: [number, number];
 }
 
-const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction, showEndTime: showEndTime }: Props) => {
+const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction, showEndTime, range }: Props) => {
     const [sliderDisplayValue, setSliderDisplayValue] = useState<number>(prediction?.enl_score ?? 50);
     const [sliderPredictionValue, setSliderPredictionValue] = useState<number>(prediction?.enl_score ?? 50);
     const isReadonly = useMemo(() => readonly(event), [readonly, event]);
@@ -28,49 +29,47 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
         onPredictionChange(event.id, { winner: faction, enl_score: sliderPredictionValue, res_score });
     }, [onPredictionChange, event.id, sliderPredictionValue]);
 
+    const thumbClass = sliderDisplayValue === 50 ? 'bg-foreground' : sliderDisplayValue > 50 ? 'bg-res' : 'bg-enl';
+
     return (
-            <Tooltip content="Prediction cutoff date has passed." showArrow isDisabled={!isReadonly}>
-            <Card>
-                <CardHeader>
-                    <div className="flex flex-col">
-                        <div className="flex flex-row justify-between">
-                            <p className="text-lg font-semibold">{event.name}</p>
-                            {isReadonly && <LockClosedIcon className="size-6" />}
+        <Card className={isReadonly ? "cursor-not-allowed" : ""}>
+            <Card.Header>
+                <div className="flex flex-col justify-between sm:flex-row">
+                    <p className="text-lg font-semibold">{event.name}</p>                    
+                    {isReadonly && (
+                        <div tabIndex={0} className="flex items-center gap-2 mt-1 text-slate-400">
+                            <LockClosedIcon className='size-4'/> Prediction cutoff date has passed.
                         </div>
-                        <p className="text-slate-400">
-                            A cancellation will result in no points for your prediction.
-                            Cutoff date for predictions is 24 hours before the event starts.
-                        </p>
-                    </div>
-                </CardHeader>
-                <CardBody>
-                    <div className="flex flex-row justify-between gap-3">
-                        <p className={"text-success transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}>Enlightened</p>
-                        <p className='w-[6em] text-center'>{sliderDisplayValue}%</p>
-                        <Slider
-                            isDisabled={isReadonly}
-                            aria-label={`${event.name} Anomaly Enlightened percentage score`}
-                            minValue={0}
-                            maxValue={100}
-                            value={sliderDisplayValue}
-                            onChange={(value) => setSliderDisplayValue(Array.isArray(value) ? value[0] : value)}
-                            onChangeEnd={(value) => setSliderPredictionValue(Array.isArray(value) ? value[0] : value)}
-                            onDoubleClick={() => { setSliderPredictionValue(50); setSliderDisplayValue(50); }}
-                            classNames={{
-                                track: cn('bg-primary', '!border-s-success'), filler: cn('bg-success'), thumb: sliderDisplayValue === 50 ? cn('bg-foreground') :
-                                sliderDisplayValue > 50 ? cn('bg-success') :
-                                cn('bg-primary')
-                            }}
-                        />
-                        <p className='w-[6em] text-center'>{100 - sliderDisplayValue}%</p>
-                        <p className={"text-primary transition-opacity " + (sliderDisplayValue >= 50 && 'opacity-25')}>Resistance</p>
-                    </div>
-                    <p className="text-slate-400 text-sm mt-3">
-                        {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndTime ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
-                    </p>
-                </CardBody>
-            </Card>
-        </Tooltip>
+                    )}
+                </div>
+            </Card.Header>
+            <Card.Content>
+                <div className="flex flex-row justify-between gap-3">
+                    <p className={"text-enl transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}><span className="sm:hidden">ENL</span><span className="hidden sm:inline">Enlightened</span></p>
+                    <p className='w-[6em] text-center'>{sliderDisplayValue}%</p>
+                    <Slider
+                        isDisabled={isReadonly}
+                        aria-label={`${event.name} Anomaly Enlightened percentage score`}
+                        minValue={range ? range[0] : 0}
+                        maxValue={range ? range[1] : 100}
+                        value={sliderDisplayValue}
+                        onChange={(value) => setSliderDisplayValue(Array.isArray(value) ? value[0] : value)}
+                        onChangeEnd={(value) => setSliderPredictionValue(Array.isArray(value) ? value[0] : value)}
+                        onDoubleClick={() => { setSliderPredictionValue(50); setSliderDisplayValue(50); }}
+                    >
+                        <Slider.Track className="bg-res !border-s-enl">
+                            <Slider.Fill className="bg-enl" />
+                            <Slider.Thumb className={thumbClass} />
+                        </Slider.Track>
+                    </Slider>
+                    <p className='w-[6em] text-center'>{100 - sliderDisplayValue}%</p>
+                    <p className={"text-res transition-opacity " + (sliderDisplayValue >= 50 && 'opacity-25')}><span className="sm:hidden">RES</span><span className="hidden sm:inline">Resistance</span></p>
+                </div>
+                <p className="text-slate-400 text-sm mt-3">
+                    {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndTime ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
+                </p>
+            </Card.Content>
+        </Card>
     );
 };
 

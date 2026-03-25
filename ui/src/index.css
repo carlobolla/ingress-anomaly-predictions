@@ -1,3 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "@heroui/styles";
+
+:root,
+[data-theme="light"] {
+  --enl: oklch(0.7433 0.1603 140.55);
+  --enl-foreground: oklch(0.15 0 0);
+  --res: oklch(0.6261 0.1371 237.57);
+  --res-foreground: oklch(0.15 0 0);
+}
+
+.dark,
+[data-theme="dark"] {
+  --enl: oklch(0.6831 0.2132 145.26);
+  --enl-foreground: oklch(0.96 0 0);
+  --res: oklch(0.6261 0.1371 237.57);
+  --res-foreground: oklch(0.96 0 0);
+}
+
+/* Make the color available to Tailwind */
+@theme inline {
+  --color-res: var(--res);
+  --color-enl: var(--enl);
+  --color-enl-foreground: var(--enl-foreground);
+  --color-res-foreground: var(--res-foreground);  
+}

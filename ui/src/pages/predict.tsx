@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navbar } from '../components';
-import { Button, Modal, ModalContent, ModalBody, ModalHeader, ModalFooter, Alert, Skeleton } from '@heroui/react';
+import { Alert, Button, CloseButton, Modal, Skeleton } from '@heroui/react';
 import { useParams } from 'react-router';
 import { Event, PredictionData, EventType, Prediction, Series } from '../types';
+import dayjs from 'dayjs';
 import api from '../api/axios';
 import { EventTypeString } from '../types/event';
 import EventsContainer from '../components/events-container';
@@ -32,7 +33,6 @@ const Predict = () => {
             setSeries(seriesRes.data);
         }
         initialize();
-
     }, [params.seriesId]);
 
     const handlePredictionChange = useCallback((id: number, predictionData: PredictionData) => {
@@ -40,11 +40,26 @@ const Predict = () => {
         setPredictionData((prev) => ({ ...prev, [id]: predictionData }));
     }, []);
 
-    const onOpenChange = () => setIsOpen(!isOpen);
+    const isPastCutoff = (event: Event) => {
+        switch (event.type) {
+            case EventType.globalchallenge:
+                return dayjs(event.end_time).subtract(15, 'days') < dayjs();
+            case EventType.anomaly:
+                return dayjs(event.start_time).subtract(24, 'days') < dayjs();
+            case EventType.skirmish:
+                return dayjs(event.start_time).subtract(24, 'hours') < dayjs();
+            default:
+                return dayjs(event.start_time).subtract(24, 'hours') < dayjs();
+        };
+    }
 
     const savePrediction = async () => {
         try {
-            const allEntries = Object.entries(predictionData);
+            const allEntries = Object.entries(predictionData)
+                .filter(([eventId]) => {
+                    const event = events.find(e => e.id === Number(eventId));
+                    return event && !isPastCutoff(event);
+                });
             const newEntries = allEntries.filter(([eventId]) => existingPredictionIds[Number(eventId)] === undefined);
             const existingEntries = allEntries.filter(([eventId]) => existingPredictionIds[Number(eventId)] !== undefined);
 
@@ -81,40 +96,61 @@ const Predict = () => {
         <div>
             <Navbar />
             <div className="my-5 container px-3 sm:px-0 mx-auto">
-                <h1 className="text-2xl font-semibold sm:font-4xl flex"><Skeleton isLoaded={isDataLoaded}>{series?.name} Series</Skeleton></h1>
-                {isDataLoaded && 
+                <h1 className="text-2xl font-semibold sm:font-4xl flex">
+                    {!isDataLoaded
+                        ? <Skeleton className="h-8 w-48 rounded-lg" />
+                        : <>{series?.name} Series</>
+                    }
+                </h1>
+                {isDataLoaded &&
                     Object.entries(groupEventsByType(events)).map(([type, events]) => (
                         <div key={type}>
                             <h2 className="text-xl font-semibold sm:font-3xl my-5">{EventTypeString[Number(type)]} Events</h2>
-                                <EventsContainer
-                                    events={events}
-                                    type={Number(type)}
-                                    handlePredictionChange={handlePredictionChange}
-                                    predictionData={predictionData}
-                                />
+                            <EventsContainer
+                                events={events}
+                                type={Number(type)}
+                                handlePredictionChange={handlePredictionChange}
+                                predictionData={predictionData}
+                            />
                         </div>
-                    ))              
+                    ))
                 }
-                {isDataLoaded && <Button onPress={() => {setIsOpen(true)}} className='mt-5' variant='ghost' color='primary'>Save prediction</Button>}
-            </div>
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-                <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader className="flex flex-col gap-1">Save prediction</ModalHeader>
-                        <ModalBody>
-                            <p>Are you sure you want to save your prediction?</p>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onPress={onClose}>Cancel</Button>
-                            <Button color="primary" onPress={savePrediction}>Save</Button>
-                        </ModalFooter>
-                    </>
+                {isDataLoaded && (
+                    <Modal>
+                        <Button onPress={() => setIsOpen(true)} className='mt-5'>Save prediction</Button>
+                        <Modal.Backdrop isOpen={isOpen} onOpenChange={setIsOpen}>
+                            <Modal.Container>
+                                <Modal.Dialog>
+                                    {({ close }) => (
+                                        <>
+                                            <Modal.Header>
+                                                <Modal.Heading>Save prediction</Modal.Heading>
+                                            </Modal.Header>
+                                            <Modal.Body>
+                                                <p>Are you sure you want to save your prediction?</p>
+                                            </Modal.Body>
+                                            <Modal.Footer>
+                                                <Button variant="tertiary" onPress={close}>Cancel</Button>
+                                                <Button variant="primary" onPress={savePrediction}>Save</Button>
+                                            </Modal.Footer>
+                                        </>
+                                    )}
+                                </Modal.Dialog>
+                            </Modal.Container>
+                        </Modal.Backdrop>
+                    </Modal>
                 )}
-                </ModalContent>
-            </Modal>
+            </div>
             <div className="fixed left-3 bottom-3 flex items-center justify-center">
-                <Alert onClose={() => setIsVisible(false)} isVisible={isVisible} color="success" title="Your prediction has been saved!" variant="solid" />
+                {isVisible && (
+                    <Alert status="success">
+                        <Alert.Indicator />
+                        <Alert.Content>
+                            <Alert.Title>Your prediction has been saved!</Alert.Title>
+                        </Alert.Content>
+                        <CloseButton aria-label="Close" onPress={() => setIsVisible(false)} />
+                    </Alert>
+                )}
             </div>
         </div>
     );

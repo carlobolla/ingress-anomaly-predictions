@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody } from '@heroui/react';
+import { Card } from '@heroui/react';
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import SingleSite from './single-site';
@@ -17,10 +17,9 @@ interface Props {
 }
 
 const RegionList = ({ region, events, onPredictionChange, predictions, subtext, readonly }: Props) => {
-    //const date = events[0].start_time;
     return (
         <Card>
-            <CardHeader>
+            <Card.Header>
                 <div className="flex flex-col">
                     <div className="flex flex-row justify-between">
                         <p className="text-lg font-semibold">{region} Region</p>
@@ -30,8 +29,8 @@ const RegionList = ({ region, events, onPredictionChange, predictions, subtext, 
                         {subtext}
                     </p>
                 </div>
-            </CardHeader>
-            <CardBody className="flex gap-3">
+            </Card.Header>
+            <Card.Content className="flex gap-3">
                 {events.map((event, index) => (
                     <SingleSite
                         key={event.id}
@@ -42,7 +41,7 @@ const RegionList = ({ region, events, onPredictionChange, predictions, subtext, 
                         readonly={readonly}
                     />
                 ))}
-            </CardBody>
+            </Card.Content>
         </Card>
     );
 };

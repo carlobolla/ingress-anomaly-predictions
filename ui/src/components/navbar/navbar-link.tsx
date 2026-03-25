@@ -1,4 +1,3 @@
-import { NavbarItem } from "@heroui/react"
 import { Link } from 'react-router'
 
 interface props{
@@ -7,12 +6,17 @@ interface props{
 }
 
 const NavbarLink = (props: props) => {
+    const isActive = location.pathname === props.href;
     return(
-        <NavbarItem isActive={location.pathname === props.href}>
-            <Link aria-current="page" to={props.href}>
+        <li>
+            <Link
+                aria-current={isActive ? "page" : undefined}
+                className={isActive ? "font-medium text-accent" : ""}
+                to={props.href}
+            >
                 {props.text}
             </Link>
-        </NavbarItem>
+        </li>
     )
 }
 
