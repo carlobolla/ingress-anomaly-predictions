@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Skeleton } from "@heroui/react";
+import { Avatar, Skeleton } from "@heroui/react";
 import { Navbar } from "../components";
 import { Series } from "../types";
 import { LeaderboardEntry } from "../types/leaderboard";
@@ -102,6 +102,11 @@ const Leaderboard = () => {
                                     <span className="w-6 text-right font-mono text-sm text-foreground/40 shrink-0">
                                         {index + 1}
                                     </span>
+
+                                    <Avatar size="sm" className={entry.faction === "ENL" ? "ring-2 ring-enl shrink-0" : entry.faction === "RES" ? "ring-2 ring-res shrink-0" : "shrink-0"}>
+                                        <Avatar.Image src={entry.photo_url} alt={entry.first_name} />
+                                        <Avatar.Fallback>{entry.first_name?.[0]}</Avatar.Fallback>
+                                    </Avatar>
 
                                     <div className="flex-1 min-w-0 flex items-center gap-2">
                                         <a
