@@ -28,7 +28,7 @@ router.patch('/me/faction', async (req: Request, res: Response) => {
 
     const { data: user, error } = await supabase
         .from('user')
-        .update({ faction })
+        .update({ faction, edited_at: new Date().toISOString() })
         .eq('id', userId)
         .select()
         .single();

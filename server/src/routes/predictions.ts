@@ -64,6 +64,7 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
             winner: p.winner ?? null,
             enl_score: p.enl_score,
             res_score: p.res_score,
+            edited_at: new Date().toISOString(),
         }));
 
     if (rows.length === 0) {
@@ -87,7 +88,7 @@ router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response
     const { id } = req.params;
     if (!id) return res.status(400).json({ error: 'Missing route param: id' });
 
-    const body: Partial<PredictionInput> = req.body;
+    const body: Partial<PredictionInput> & { edited_at: string } = { ...req.body, edited_at: new Date().toISOString() };
 
     // Fetch the event's start_time via the prediction to enforce the 24h cutoff
     const { data: existing, error: fetchError } = await supabase
