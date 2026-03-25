@@ -1,5 +1,5 @@
 import { LockClosedIcon } from '@heroicons/react/24/solid';
-import { Card, Slider, Tooltip } from '@heroui/react';
+import { Card, Slider } from '@heroui/react';
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat'

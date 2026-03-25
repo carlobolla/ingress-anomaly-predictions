@@ -5,7 +5,6 @@ import { useAuth } from "../../hooks";
 const UserAvatar = ({size}: {size: "sm" | "lg"}) => {
     const navigate = useNavigate();
     const { logout, user } = useAuth();
-    const avatarColor = user?.faction === "ENL" ? "enl" : user?.faction === "RES" ? "res" : "default";
     const avatarRingClass = user?.faction === "ENL" ? "ring-2 ring-enl" : user?.faction === "RES" ? "ring-2 ring-res" : "";
 
     switch(size) {
