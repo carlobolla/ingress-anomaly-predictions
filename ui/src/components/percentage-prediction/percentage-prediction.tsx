@@ -24,7 +24,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
     const isReadonly = useMemo(() => readonly(event), [readonly, event]);
 
     useEffect(() => {
-        const faction = sliderPredictionValue === 50 ? 'DRAW' : sliderPredictionValue < 50 ? 'RES' : 'ENL';
+        const faction = sliderPredictionValue === 50 ? undefined : sliderPredictionValue < 50 ? 'RES' : 'ENL';
         const res_score = 100 - sliderPredictionValue;
         onPredictionChange(event.id, { winner: faction, enl_score: sliderPredictionValue, res_score });
     }, [onPredictionChange, event.id, sliderPredictionValue]);

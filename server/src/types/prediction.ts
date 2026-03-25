@@ -16,7 +16,7 @@ export default interface Prediction {
 }
 
 export interface PredictionInput {
-    winner: Winner;
+    winner?: Winner;
     enl_score: number;
     res_score: number;
 }
