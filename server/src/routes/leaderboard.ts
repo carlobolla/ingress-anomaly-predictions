@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
 import supabase from '../db/supabase';
-import { authenticate } from '../middleware/auth';
+import { authenticate, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 // GET /leaderboard — authenticated, get leaderboard from leaderboard_global view
-router.get('/', authenticate, async (_req: Request, res: Response) => {
+router.get('/', authenticate, requireAdmin, async (_req: Request, res: Response) => {
     try {
         const { data, error } = await supabase.from('leaderboard_global').select('*');
         if (error) throw new Error(error.message);

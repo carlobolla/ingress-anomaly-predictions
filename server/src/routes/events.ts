@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import supabase from '../db/supabase';
-import Event from '../types/event';
 
 const router = Router();
 
@@ -39,49 +38,6 @@ router.get('/:id', async (req: Request, res: Response) => {
 
     if (error) return res.status(404).json({ error: error.message });
     return res.json(data);
-});
-
-// POST /events
-router.post('/', async (req: Request, res: Response) => {
-    const body: Partial<Event> = req.body;
-
-    const { data, error } = await supabase
-        .from('event')
-        .insert(body)
-        .select()
-        .single();
-
-    if (error) return res.status(400).json({ error: error.message });
-    return res.status(201).json(data);
-});
-
-// PUT /events/:id
-router.put('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const body: Partial<Event> = req.body;
-
-    const { data, error } = await supabase
-        .from('event')
-        .update(body)
-        .eq('id', id)
-        .select()
-        .single();
-
-    if (error) return res.status(400).json({ error: error.message });
-    return res.json(data);
-});
-
-// DELETE /events/:id
-router.delete('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    const { error } = await supabase
-        .from('event')
-        .delete()
-        .eq('id', id);
-
-    if (error) return res.status(400).json({ error: error.message });
-    return res.status(204).send();
 });
 
 export default router;

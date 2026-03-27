@@ -8,6 +8,8 @@ import predictionsRouter from './routes/predictions';
 import usersRouter from './routes/users';
 import leaderboardRouter from './routes/leaderboard';
 
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

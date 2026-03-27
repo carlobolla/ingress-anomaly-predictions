@@ -74,9 +74,9 @@ router.post('/telegram', async (req: Request, res: Response) => {
         if (error) return res.status(500).json({ error: error.message });
 
         const token = jwt.sign(
-            { sub: user.id, telegram_id: Number(payload.id) },
+            { sub: user.id, telegram_id: Number(payload.id), role: user.role },
             process.env.JWT_SECRET!,
-            { expiresIn: '7d' }
+            { expiresIn: '48h' }
         );
 
         return res.json({ token, user });

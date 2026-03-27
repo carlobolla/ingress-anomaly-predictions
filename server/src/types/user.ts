@@ -7,4 +7,5 @@ export default interface User
     photo_url: string;
     telegram_id: number;
     faction: string;
+    role: 'admin' | 'user';
 }
