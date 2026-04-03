@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Avatar, Skeleton } from "@heroui/react";
 import { Navbar } from "../components";
-import { Series } from "../types";
+import { Series, EventType } from "../types";
 import { LeaderboardEntry } from "../types/leaderboard";
+import Event from "../types/event";
 import api from "../api/axios";
 import useAuth from "../hooks/use_auth";
 
@@ -37,14 +38,14 @@ const telegramHref = (user: { username?: string; telegram_id?: number }) =>
 
 const formatPrediction = (p: ScoredPrediction) => {
     if (p.predicted_enl_score != null && p.predicted_res_score != null) {
-        return `ENL ${p.predicted_enl_score}% / RES ${p.predicted_res_score}%`;
+        return `ENL ${p.predicted_enl_score}% - ${p.predicted_res_score}% RES`;
     }
     return p.predicted_winner ?? "-";
 };
 
 const formatActual = (p: ScoredPrediction) => {
     if (p.actual_enl_score != null && p.actual_res_score != null) {
-        return `ENL ${p.actual_enl_score}% / RES ${p.actual_res_score}%`;
+        return `ENL ${p.actual_enl_score}% - ${p.actual_res_score}% RES`;
     }
     return p.actual_winner ?? "TBD";
 };
@@ -91,9 +92,13 @@ const Leaderboard = () => {
         Promise.all([
             api.get(`/leaderboard/${selectedSeriesId}/position`).then(res => res.data as UserPosition).catch(() => null),
             api.get(`/predictions/series/${selectedSeriesId}/scored`).then(res => res.data as ScoredPrediction[]).catch(() => []),
-        ]).then(([position, predictions]) => {
+            api.get(`/events/series/${selectedSeriesId}`).then(res => res.data as Event[]).catch(() => []),
+            api.get('/events/types').then(res => res.data as EventType[]).catch(() => []),
+        ]).then(([position, predictions, events, eventTypes]) => {
+            const typeOrderMap = new Map(eventTypes.map(et => [et.id, et.order]));
+            const eventTypeOrderMap = new Map(events.map(e => [e.id, typeOrderMap.get(e.type) ?? 0]));
             setUserPosition(position);
-            setScoredPredictions(predictions);
+            setScoredPredictions([...predictions].sort((a, b) => (eventTypeOrderMap.get(a.event) ?? 0) - (eventTypeOrderMap.get(b.event) ?? 0)));
         }).finally(() => setLoadingUserData(false));
     }, [selectedSeriesId]);
 
@@ -188,7 +193,7 @@ const Leaderboard = () => {
                                                 <td className="px-4 py-2 text-foreground/70 font-mono text-xs">{formatPrediction(p)}</td>
                                                 <td className="px-4 py-2 text-foreground/70 font-mono text-xs">{formatActual(p)}</td>
                                                 <td className="px-4 py-2 text-right font-mono font-semibold">
-                                                    {p.score != null ? `${p.score} pts` : "—"}
+                                                    {p.score != null ? `${p.score} pts` : "-"}
                                                 </td>
                                             </tr>
                                         ))}

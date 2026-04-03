@@ -39,7 +39,7 @@ const Scoring = () => {
                         <div className="rounded-lg border border-foreground/10 p-4">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="font-semibold">Global Challenge</p>
+                                    <p className="font-semibold">Global Challenge / First Saturdays</p>
                                     <p className="text-foreground/60 text-sm mt-1">Same format, but these events tend to finish very close to 50/50. You need to be precise to score well. Tolerance window: ±5%.</p>
                                 </div>
                                 <div className="text-right shrink-0">

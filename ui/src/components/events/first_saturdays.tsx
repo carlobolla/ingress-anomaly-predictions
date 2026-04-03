@@ -17,8 +17,9 @@ const FirstSaturdays = ({ events, handlePredictionChange, predictionData }: Firs
         <>
             <div className="mb-5">
                 <p className="text-slate-400 flex items-center gap-2">
-                    A cancellation will result in no points for your prediction.
-                    Limited to the range of 40-60%.
+                    Predict the split of participants between the two factions for First Saturday events in this series.<br />
+                    Limited to the range of 40-60%.<br />
+                    If both factions hit their threshold for participants (7500 agents), the event will be scored as a draw.
                 </p>
             </div>
             <div className={mediaQuery ? "grid grid-cols-3 gap-4 w-full" : "grid grid-cols-1 gap-4 w-full"}>
