@@ -14,7 +14,7 @@ const UserAvatar = ({size}: {size: "sm" | "lg"}) => {
                     <Popover.Trigger>
                         <div className="cursor-pointer flex gap-3 items-center">
                             <Avatar size="sm" className={avatarRingClass}>
-                                {!user?.hide_picture && <Avatar.Image src={user?.photo_url} alt={user?.first_name} />}
+                                <Avatar.Image src={user?.photo_url} alt={user?.first_name} />
                                 <Avatar.Fallback>{user?.first_name?.[0]}</Avatar.Fallback>
                             </Avatar>
                             {user?.first_name}
@@ -42,7 +42,7 @@ const UserAvatar = ({size}: {size: "sm" | "lg"}) => {
             return (
                 <div className="flex items-center gap-4 mb-8">
                     <Avatar size="lg" className={avatarRingClass}>
-                        {!user?.hide_picture && <Avatar.Image src={user?.photo_url} alt={user?.first_name} />}
+                        {<Avatar.Image src={user?.photo_url} alt={user?.first_name} />}
                         <Avatar.Fallback>{user?.first_name?.[0]}</Avatar.Fallback>
                     </Avatar>
                     <div>
