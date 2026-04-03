@@ -31,6 +31,7 @@ const GlobalChallengeEvents = ({ events, handlePredictionChange, predictionData 
                         readonly={isPastCutoff}
                         showEndTime
                         range={[40, 60]}
+                        actualScore={event.enl_score}
                     />
                 ))}
             </div>

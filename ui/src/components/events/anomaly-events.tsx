@@ -29,6 +29,7 @@ const AnomalyEvents = ({ events, handlePredictionChange, predictionData }: Anoma
                         onPredictionChange={handlePredictionChange}
                         prediction={predictionData ? predictionData[event.id] : undefined}
                         readonly={isPastCutoff}
+                        actualScore={event.enl_score}
                     />
                 ))}
             </div>

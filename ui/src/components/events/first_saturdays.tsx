@@ -32,6 +32,7 @@ const FirstSaturdays = ({ events, handlePredictionChange, predictionData }: Firs
                         readonly={isPastCutoff}
                         showEndTime
                         range={[40, 60]}
+                        actualScore={event.enl_score}
                     />
                 ))}
             </div>

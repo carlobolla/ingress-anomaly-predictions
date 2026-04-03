@@ -16,9 +16,10 @@ interface Props {
     prediction?: PredictionData;
     showEndTime?: boolean;
     range?: [number, number];
+    actualScore?: number | null;
 }
 
-const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction, showEndTime, range }: Props) => {
+const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction, showEndTime, range, actualScore }: Props) => {
     const [sliderDisplayValue, setSliderDisplayValue] = useState<number>(prediction?.enl_score ?? 50);
     const [sliderPredictionValue, setSliderPredictionValue] = useState<number>(prediction?.enl_score ?? 50);
     const isReadonly = useMemo(() => readonly(event), [readonly, event]);
@@ -30,6 +31,9 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
     }, [onPredictionChange, event.id, sliderPredictionValue]);
 
     const thumbClass = sliderDisplayValue === 50 ? 'bg-foreground' : sliderDisplayValue > 50 ? 'bg-res' : 'bg-enl';
+    const min = range ? range[0] : 0;
+    const max = range ? range[1] : 100;
+    const actualMarkerPct = actualScore != null ? ((actualScore - min) / (max - min)) * 100 : null;
 
     return (
         <Card className={isReadonly ? "cursor-not-allowed" : ""}>
@@ -44,7 +48,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                 </div>
             </Card.Header>
             <Card.Content>
-                <div className="flex flex-row justify-between gap-3">
+                <div className="flex flex-row justify-between gap-3 items-center">
                     <p className={"text-enl transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}><span className="sm:hidden">ENL</span><span className="hidden sm:inline">Enlightened</span></p>
                     <p className='w-[6em] text-center'>{sliderDisplayValue}%</p>
                     <Slider
@@ -60,11 +64,23 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                         <Slider.Track className="bg-res !border-s-enl">
                             <Slider.Fill className="bg-enl" />
                             <Slider.Thumb className={thumbClass} />
+                            {actualMarkerPct != null && (
+                                <div
+                                    className="absolute top-1/2 -translate-y-1/2 w-1 h-4 bg-foreground rounded-full pointer-events-none"
+                                    style={{ left: `${actualMarkerPct}%` }}
+                                />
+                            )}
                         </Slider.Track>
                     </Slider>
                     <p className='w-[6em] text-center'>{100 - sliderDisplayValue}%</p>
                     <p className={"text-res transition-opacity " + (sliderDisplayValue >= 50 && 'opacity-25')}><span className="sm:hidden">RES</span><span className="hidden sm:inline">Resistance</span></p>
                 </div>
+                {/* <div className="flex-grow"></div> */}
+                {actualScore != null && (
+                    <p className="text-sm mt-3 font-mono">
+                        Result: <span className="text-enl">{actualScore}% ENL</span> - <span className="text-res">RES {100 - actualScore}%</span>
+                    </p>
+                )}
                 <p className="text-slate-400 text-sm mt-3">
                     {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndTime ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
                 </p>

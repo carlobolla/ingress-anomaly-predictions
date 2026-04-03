@@ -6,7 +6,9 @@ interface Event {
     cutoff_time: Date,
     type: number,
     series: number,
-    region: Region
+    region: Region,
+    enl_score?: number | null,
+    res_score?: number | null,
 }
 
 export interface EventType {
