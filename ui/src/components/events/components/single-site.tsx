@@ -1,7 +1,7 @@
 import { Separator, Slider, Tooltip } from '@heroui/react';
 import { useState, useEffect, useMemo } from 'react';
 import { Event, PredictionData } from '../../../types';
-import { LockClosedIcon } from '@heroicons/react/16/solid';
+import { LockClosedIcon, TrophyIcon } from '@heroicons/react/16/solid';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -60,9 +60,20 @@ const SingleSite = ({ event, last, onPredictionChange, predictionData, readonly,
                                 </p>
                             </div>
                         </div>
-                        <p className="text-slate-400 text-sm">
-                            {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndDate ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
-                        </p>
+                        <div className="flex items-center justify-between mt-2 items-center">
+                            <p className="text-slate-400 text-sm">
+                                {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndDate ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
+                            </p>
+                            {event.actual_winner && (
+                                <p className="text-sm font-mono flex items-center gap-2">
+                                    <span className="flex items-center gap-1">
+                                        <TrophyIcon className="size-3" />
+                                        <span className={event.actual_winner === 'ENL' ? 'text-enl' : 'text-res'}>{event.actual_winner}</span>
+                                    </span>
+                                    {predictionData?.score != null && <span className="font-semibold">{predictionData.score} pts</span>}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </Tooltip.Trigger>
                 <Tooltip.Content showArrow>

@@ -9,6 +9,7 @@ interface Event {
     region: Region,
     enl_score?: number | null,
     res_score?: number | null,
+    actual_winner?: string | null,
 }
 
 export interface EventType {
