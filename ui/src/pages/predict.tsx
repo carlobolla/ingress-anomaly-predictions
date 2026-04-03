@@ -28,7 +28,7 @@ const Predict = () => {
                 api.get('/events/types').then(res => res.data as EventType[]),
             ]);
             const existingPredictions: Prediction[] = predictionsRes.data;
-            setPredictionData(Object.fromEntries(existingPredictions.map(p => [p.event, { winner: p.winner, enl_score: p.enl_score, res_score: p.res_score }])));
+            setPredictionData(Object.fromEntries(existingPredictions.map(p => [p.event, { winner: p.winner, enl_score: p.enl_score, res_score: p.res_score, score: p.score }])));
             setExistingPredictionIds(Object.fromEntries(existingPredictions.map(p => [p.event, p.id])));
             setEvents(eventsRes.data);
             setSeries(seriesRes.data);

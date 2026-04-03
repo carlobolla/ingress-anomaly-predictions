@@ -47,7 +47,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                     )}
                 </div>
             </Card.Header>
-            <Card.Content>
+            <Card.Content className="justify-between">
                 <div className="flex flex-row justify-between gap-3 items-center">
                     <p className={"text-enl transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}><span className="sm:hidden">ENL</span><span className="hidden sm:inline">Enlightened</span></p>
                     <p className='w-[6em] text-center'>{sliderDisplayValue}%</p>
@@ -75,10 +75,11 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                     <p className='w-[6em] text-center'>{100 - sliderDisplayValue}%</p>
                     <p className={"text-res transition-opacity " + (sliderDisplayValue >= 50 && 'opacity-25')}><span className="sm:hidden">RES</span><span className="hidden sm:inline">Resistance</span></p>
                 </div>
-                {/* <div className="flex-grow"></div> */}
+                
                 {actualScore != null && (
-                    <p className="text-sm mt-3 font-mono">
-                        Result: <span className="text-enl">{actualScore}% ENL</span> - <span className="text-res">RES {100 - actualScore}%</span>
+                    <p className="text-sm mt-3 font-mono flex items-center justify-between">
+                        <span>Result: <span className="text-enl">{actualScore}% ENL</span> / <span className="text-res">RES {100 - actualScore}%</span></span>
+                        {prediction?.score != null && <span className="font-semibold">{prediction.score} pts</span>}
                     </p>
                 )}
                 <p className="text-slate-400 text-sm mt-3">
