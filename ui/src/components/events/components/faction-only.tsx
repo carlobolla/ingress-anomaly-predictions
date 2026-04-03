@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { PredictionData, Event } from "../../types";
+import { PredictionData, Event } from "../../../types";
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { useState, useMemo, useEffect } from "react";
@@ -26,14 +26,14 @@ const PredictionFactionOnly = ({ event, onPredictionChange, readonly, prediction
 
         onPredictionChange(event.id, { winner: faction === 50 ? null : faction === 0 ? 'ENL' : 'RES'});
     }, [faction, onPredictionChange, event.id]);
-    
+
     const thumbClass = faction === 50 ? 'bg-foreground' : faction > 50 ? 'bg-res' : 'bg-enl';
 
     return (
         <Card className={isReadonly ? "cursor-not-allowed" : ""}>
             <Card.Header>
                 <div className="flex flex-col justify-between sm:flex-row">
-                    <p className="text-lg font-semibold">{event.name}</p>                    
+                    <p className="text-lg font-semibold">{event.name}</p>
                     {isReadonly && (
                         <div tabIndex={0} className="flex items-center gap-2 mt-1 text-slate-400">
                             <LockClosedIcon className='size-4'/> Prediction cutoff date has passed.

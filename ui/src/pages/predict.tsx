@@ -4,7 +4,6 @@ import { Alert, Button, CloseButton, Modal, Skeleton } from '@heroui/react';
 import { useParams } from 'react-router';
 import { Event, PredictionData, EventType, Prediction, Series } from '../types';
 import api from '../api/axios';
-import { EventTypeString } from '../types/event';
 import EventsContainer from '../components/events-container';
 import { isPastCutoff } from '../utils/cutoff';
 
@@ -12,25 +11,28 @@ const Predict = () => {
     const params = useParams();
     const [events, setEvents] = useState<Event[]>([]);
     const [series, setSeries] = useState<Series>();
+    const [eventTypes, setEventTypes] = useState<EventType[]>([]);
     const [predictionData, setPredictionData] = useState<{ [id: number]: PredictionData }>({});
     const [isOpen, setIsOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [existingPredictionIds, setExistingPredictionIds] = useState<{ [eventId: number]: number }>({});
 
-    const isDataLoaded = useMemo(() => events.length > 0 && series !== undefined, [events, series]);
+    const isDataLoaded = useMemo(() => events.length > 0 && series !== undefined && eventTypes.length > 0, [events, series, eventTypes]);
 
     useEffect(() => {
         const initialize = async () => {
-            const [predictionsRes, eventsRes, seriesRes] = await Promise.all([
+            const [predictionsRes, eventsRes, seriesRes, eventTypesRes] = await Promise.all([
                 api.get(`/predictions/series/${params.seriesId}`),
                 api.get(`/events/series/${params.seriesId}`),
                 api.get(`/series/${params.seriesId}`),
+                api.get('/events/types').then(res => res.data as EventType[]),
             ]);
             const existingPredictions: Prediction[] = predictionsRes.data;
             setPredictionData(Object.fromEntries(existingPredictions.map(p => [p.event, { winner: p.winner, enl_score: p.enl_score, res_score: p.res_score }])));
             setExistingPredictionIds(Object.fromEntries(existingPredictions.map(p => [p.event, p.id])));
             setEvents(eventsRes.data);
             setSeries(seriesRes.data);
+            setEventTypes(eventTypesRes);
         }
         initialize();
     }, [params.seriesId]);
@@ -75,7 +77,7 @@ const Predict = () => {
             }
             acc[event.type]!.push(event);
             return acc;
-        }, {} as { [key in EventType]?: Event[] });
+        }, {} as { [key in number]?: Event[] });
     }
 
     return (
@@ -88,19 +90,23 @@ const Predict = () => {
                         : <>{series?.name} Series</>
                     }
                 </h1>
-                {isDataLoaded &&
-                    Object.entries(groupEventsByType(events)).map(([type, events]) => (
-                        <div key={type}>
-                            <h2 className="text-xl font-semibold sm:font-3xl my-5">{EventTypeString[Number(type)]} Events</h2>
-                            <EventsContainer
-                                events={events}
-                                type={Number(type)}
-                                handlePredictionChange={handlePredictionChange}
-                                predictionData={predictionData}
-                            />
-                        </div>
-                    ))
-                }
+                {isDataLoaded && (() => {
+                    const grouped = groupEventsByType(events);
+                    return [...eventTypes]
+                        .sort((a, b) => a.order - b.order)
+                        .filter(et => grouped[et.id])
+                        .map(et => (
+                            <div key={et.id}>
+                                <h2 className="text-xl font-semibold sm:font-3xl my-5">{et.name} Events</h2>
+                                <EventsContainer
+                                    events={grouped[et.id]!}
+                                    type={et}
+                                    handlePredictionChange={handlePredictionChange}
+                                    predictionData={predictionData}
+                                />
+                            </div>
+                        ));
+                })()}
                 {isDataLoaded && (
                     <Modal>
                         <Button onPress={() => setIsOpen(true)} className='mt-5'>Save prediction</Button>

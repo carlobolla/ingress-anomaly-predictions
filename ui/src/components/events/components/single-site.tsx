@@ -1,6 +1,6 @@
 import { Separator, Slider, Tooltip } from '@heroui/react';
 import { useState, useEffect, useMemo } from 'react';
-import { Event, PredictionData } from '../../types';
+import { Event, PredictionData } from '../../../types';
 import { LockClosedIcon } from '@heroicons/react/16/solid';
 import dayjs from 'dayjs';
 

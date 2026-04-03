@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { useEffect, useMemo, useState } from 'react';
-import { Event, PredictionData } from '../../types';
+import { Event, PredictionData } from '../../../types';
 
 dayjs.extend(LocalizedFormat);
 dayjs.extend(advancedFormat);
@@ -35,7 +35,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
         <Card className={isReadonly ? "cursor-not-allowed" : ""}>
             <Card.Header>
                 <div className="flex flex-col justify-between sm:flex-row">
-                    <p className="text-lg font-semibold">{event.name}</p>                    
+                    <p className="text-lg font-semibold">{event.name}</p>
                     {isReadonly && (
                         <div tabIndex={0} className="flex items-center gap-2 mt-1 text-slate-400">
                             <LockClosedIcon className='size-4'/> Prediction cutoff date has passed.

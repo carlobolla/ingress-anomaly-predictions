@@ -3,23 +3,18 @@ interface Event {
     name: string,
     start_time: Date,
     end_time: Date,
-    type: EventType,
+    cutoff_time: Date,
+    type: number,
     series: number,
     region: Region
 }
 
-export enum EventType {
-    series,
-    globalchallenge,
-    anomaly,
-    skirmish,
-}
-
-export enum EventTypeString {
-    "Series Winner",
-    "Global Challenge",
-    "Anomaly",
-    "Skirmish",
+export interface EventType {
+    id: number;
+    name: string;
+    scoring_mode: number;
+    order: number;
+    cutoff_interval: string;
 }
 
 export enum Region {

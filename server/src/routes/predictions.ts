@@ -5,6 +5,57 @@ import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Parse a PostgreSQL interval string (e.g. "24:00:00", "1 day", "1 day 02:00:00") to milliseconds
+function intervalToMs(interval: string): number {
+    let ms = 0;
+    const dayMatch = interval.match(/(\d+)\s+days?/);
+    if (dayMatch) ms += parseInt(dayMatch[1]) * 86400000;
+    const timeMatch = interval.match(/(\d+):(\d+):(\d+)/);
+    if (timeMatch) {
+        ms += parseInt(timeMatch[1]) * 3600000;
+        ms += parseInt(timeMatch[2]) * 60000;
+        ms += parseInt(timeMatch[3]) * 1000;
+    }
+    return ms;
+}
+
+// GET /predictions/series/:series/scored — get own predictions for a series with scores and actual event results
+router.get('/series/:series/scored', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { series } = req.params;
+    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
+
+    const { data, error } = await supabase
+        .from('prediction')
+        .select('id, event!inner(id, name, series, enl_score, res_score, winner), winner, enl_score, res_score, score, edited_at, created_at')
+        .eq('event.series', series)
+        .eq('user', userId);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const result = data.map(p => {
+        const event = p.event as unknown as { id: number; name: string; series: number; enl_score: number | null; res_score: number | null; winner: string | null };
+        return {
+            id: p.id,
+            event: event.id,
+            event_name: event.name,
+            predicted_winner: p.winner,
+            predicted_enl_score: p.enl_score,
+            predicted_res_score: p.res_score,
+            score: p.score,
+            actual_enl_score: event.enl_score,
+            actual_res_score: event.res_score,
+            actual_winner: event.winner,
+            edited_at: p.edited_at,
+            created_at: p.created_at,
+        };
+    });
+
+    return res.json(result);
+});
+
 // GET /predictions/series/:series — get own predictions for a series
 router.get('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
@@ -38,37 +89,48 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
         return res.status(400).json({ error: 'Body must be a non-empty array of predictions' });
     }
 
-    // Fetch start_times for the submitted events to enforce the 24h cutoff
+    // Fetch start_times and prediction_cutoff for the submitted events
     const eventIds = inputs.map((p) => p.event);
     const { data: events, error: eventsError } = await supabase
         .from('event')
-        .select('id, start_time')
+        .select('id, start_time, eventType(prediction_cutoff)')
         .in('id', eventIds);
 
     if (eventsError) return res.status(500).json({ error: eventsError.message });
 
-    const cutoffMap = new Map<number, Date>(
-        (events ?? []).map((e) => [e.id, new Date(e.start_time)])
+    const eventMap = new Map<number, { start_time: Date; cutoffMs: number }>(
+        (events ?? []).map((e) => [e.id, {
+            start_time: new Date(e.start_time),
+            cutoffMs: intervalToMs((e.eventType as unknown as { prediction_cutoff: string }).prediction_cutoff),
+        }])
     );
 
     const now = new Date();
-    const rows = inputs
-        .filter((p) => {
-            const startTime = cutoffMap.get(p.event);
-            if (!startTime) return false;
-            return now < new Date(startTime.getTime() - 24 * 60 * 60 * 1000);
-        })
-        .map((p) => ({
+    const rows: { event: number; user: string; winner: Winner | null; enl_score: number; res_score: number; edited_at: string }[] = [];
+    const rejected: { event: number; reason: string }[] = [];
+
+    for (const p of inputs) {
+        const ev = eventMap.get(p.event);
+        if (!ev) {
+            rejected.push({ event: p.event, reason: 'Event not found' });
+            continue;
+        }
+        if (now >= new Date(ev.start_time.getTime() - ev.cutoffMs)) {
+            rejected.push({ event: p.event, reason: 'Past the prediction cutoff' });
+            continue;
+        }
+        rows.push({
             event: p.event,
             user: userId,
             winner: p.winner ?? null,
             enl_score: p.enl_score,
             res_score: p.res_score,
             edited_at: new Date().toISOString(),
-        }));
+        });
+    }
 
     if (rows.length === 0) {
-        return res.status(400).json({ error: 'All predictions are past the cutoff (24h before event start)' });
+        return res.status(400).json({ error: 'All predictions are past the cutoff', rejected });
     }
 
     const { data, error } = await supabase
@@ -77,7 +139,7 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
         .select();
 
     if (error) return res.status(400).json({ error: error.message });
-    return res.status(201).json(data);
+    return res.status(201).json({ saved: data, rejected });
 });
 
 // PUT /predictions/:id — update own prediction
@@ -90,19 +152,20 @@ router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response
 
     const body: Partial<PredictionInput> & { edited_at: string } = { ...req.body, edited_at: new Date().toISOString() };
 
-    // Fetch the event's start_time via the prediction to enforce the 24h cutoff
+    // Fetch the event's start_time and prediction_cutoff via the prediction
     const { data: existing, error: fetchError } = await supabase
         .from('prediction')
-        .select('event(start_time)')
+        .select('event(start_time, eventType(prediction_cutoff))')
         .eq('id', id)
         .eq('user', userId)
         .single();
 
     if (fetchError) return res.status(404).json({ error: 'Prediction not found' });
 
-    const startTime = new Date((existing.event as unknown as { start_time: string }).start_time);
-    if (new Date() >= new Date(startTime.getTime() - 24 * 60 * 60 * 1000)) {
-        return res.status(400).json({ error: 'Prediction is past the cutoff (24h before event start)' });
+    const ev = existing.event as unknown as { start_time: string; eventType: { prediction_cutoff: string } };
+    const cutoffMs = intervalToMs(ev.eventType.prediction_cutoff);
+    if (new Date() >= new Date(new Date(ev.start_time).getTime() - cutoffMs)) {
+        return res.status(400).json({ error: 'Prediction is past the cutoff' });
     }
 
     const { data, error } = await supabase
