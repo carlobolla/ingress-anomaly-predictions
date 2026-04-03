@@ -26,19 +26,25 @@ const factions = [
 const Profile = () => {
     const { user, updateUser } = useAuth();
     const [selected, setSelected] = useState<string | undefined>(user?.faction);
+    const [hidePhoto, setHidePhoto] = useState(user?.hide_picture ?? false);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const isDirty = selected !== user?.faction;
+    const factionDirty = selected !== user?.faction;
+    const photoSettingDirty = hidePhoto !== (user?.hide_picture ?? false);
+    const isDirty = factionDirty || photoSettingDirty;
 
     const handleSave = async () => {
-        if (!selected || !isDirty) return;
+        if (!isDirty) return;
         setSaving(true);
         setError(null);
         try {
-            await api.patch('/users/me/faction', { faction: selected });
-            updateUser({ faction: selected });
+            const body: Record<string, unknown> = {};
+            if (factionDirty && selected) body.faction = selected;
+            if (photoSettingDirty) body.hide_picture = hidePhoto;
+            await api.patch('/users/me', body);
+            updateUser({ ...(factionDirty && selected ? { faction: selected } : {}), ...(photoSettingDirty ? { hide_picture: hidePhoto } : {}) });
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
         } catch {
@@ -87,11 +93,32 @@ const Profile = () => {
                     </div>
                 </div>
 
+                <div className="mb-6">
+                    <p className="font-semibold mb-1">Privacy</p>
+                    <p className="text-foreground/60 text-sm mb-4">
+                        Control what others see on the leaderboard.
+                    </p>
+                    <button
+                        onClick={() => setHidePhoto((v: boolean) => !v)}
+                        className="w-full text-left rounded-lg border border-foreground/10 hover:border-foreground/25 p-4 transition-colors"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-sm">Hide profile picture</p>
+                                <p className="text-foreground/60 text-sm mt-0.5">Show initials instead of your Telegram photo</p>
+                            </div>
+                            <div className={`w-10 h-6 rounded-full transition-colors shrink-0 flex items-center px-0.5 ${hidePhoto ? "bg-foreground" : "bg-foreground/20"}`}>
+                                <div className={`w-5 h-5 rounded-full bg-background transition-transform ${hidePhoto ? "translate-x-4" : "translate-x-0"}`} />
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
                 {error && <p className="text-danger text-sm mb-3">{error}</p>}
 
                 <Button
                     variant="primary"
-                    isDisabled={!isDirty || !selected}
+                    isDisabled={!isDirty}
                     isPending={saving}
                     onPress={handleSave}
                 >
