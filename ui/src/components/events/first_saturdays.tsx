@@ -18,6 +18,7 @@ const FirstSaturdays = ({ events, handlePredictionChange, predictionData }: Firs
         <>
             <div className="mb-5">
                 <p className="text-slate-400 flex items-center gap-2">
+                    Cutoff date for predictions is 24 hours before the first IFS starts. (Exceptionally, open until May 1st for Orion)<br />
                     Predict the split of participants between the two factions for First Saturday events in this series.<br />
                     Limited to the range of 40-60%.<br />
                     If both factions hit their threshold for participants (7500 agents), the event will be scored as a draw.

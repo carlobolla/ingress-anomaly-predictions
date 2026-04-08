@@ -17,7 +17,7 @@ const SeriesEvents = ({ events, handlePredictionChange, predictionData }: Series
         <>
             <div className="mb-5">
                 <p className="text-slate-400 flex items-center gap-2">
-                    Predict the winning faction for the series!
+                    Predict the winning faction for the series! Cutoff date for predictions is 24 hours before the first event starts (Exceptionally, open until May 1st for Orion).
                 </p>
             </div>
             <div className={mediaQuery ? "grid grid-cols-3 gap-4 w-full" : "grid grid-cols-1 gap-4 w-full"}>
