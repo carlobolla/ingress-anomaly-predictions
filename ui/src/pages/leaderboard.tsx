@@ -13,17 +13,6 @@ import LeaderboardRow from "../components/leaderboard/leaderboard-row";
 
 const PAGE_SIZE = 20;
 
-const normalizeLeaderboardResponse = (value: any): { entries: LeaderboardEntry[]; total: number } => {
-    const total = value?.total ?? 0;
-    if (!value) return { entries: [], total };
-    if (Array.isArray(value)) return { entries: value, total };
-    if (Array.isArray(value.leaderboard)) return { entries: value.leaderboard, total };
-    if (Array.isArray(value.items)) return { entries: value.items, total };
-    if (Array.isArray(value.data)) return { entries: value.data, total };
-    if (Array.isArray(value.results)) return { entries: value.results, total };
-    return { entries: [], total };
-};
-
 const Leaderboard = () => {
     const { user } = useAuth();
     const [series, setSeries] = useState<Series[]>([]);
@@ -69,12 +58,8 @@ const Leaderboard = () => {
         api
             .get(`/leaderboard/${selectedSeriesId}`, { params: { offset, limit: PAGE_SIZE } })
             .then((res) => {
-                const { entries: normalized, total: t } = normalizeLeaderboardResponse(res.data);
-                if (normalized.length === 0 && t === 0) {
-                    console.warn("Unexpected leaderboard response", res.data);
-                }
-                setEntries(normalized);
-                setTotal(t);
+                setEntries(res.data?.leaderboard ?? []);
+                setTotal(res.data?.total ?? 0);
             })
             .catch((err) => {
                 console.error("Failed to load leaderboard", err);
@@ -105,7 +90,6 @@ const Leaderboard = () => {
                     </select>
                 )}
 
-                {/* User position + scored predictions */}
                 {loadingUserData ? (
                     <div className="space-y-2 mb-8">
                         <Skeleton className="h-16 w-full rounded-lg" />
@@ -118,7 +102,6 @@ const Leaderboard = () => {
                     </div>
                 ) : null}
 
-                {/* Main leaderboard */}
                 {loadingEntries ? (
                     <div className="space-y-2">
                         {Array.from({ length: 5 }).map((_, i) => (
