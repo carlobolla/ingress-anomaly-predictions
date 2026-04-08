@@ -10,10 +10,11 @@ import Profile from '@/pages/profile';
 import './index.css'
 import TelegramAuthProvider from '@/context/telegram-auth-provider';
 import ProtectedRoute from '@/components/protected_route';
+import Footer from '@/components/footer';
 
 export const App = () => {
   return (
-    <main className="dark text-foreground bg-background min-h-screen">
+    <main className="dark text-foreground bg-background min-h-screen flex flex-col">
       <BrowserRouter>
         <TelegramAuthProvider>
           <Routes>
@@ -25,6 +26,7 @@ export const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TelegramAuthProvider>
+        <Footer />
       </BrowserRouter>
     </main>
   )
