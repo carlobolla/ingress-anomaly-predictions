@@ -52,6 +52,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                     <p className={"text-enl transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}><span className="sm:hidden">ENL</span><span className="hidden sm:inline">Enlightened</span></p>
                     <p className='w-[6em] text-center'>{sliderDisplayValue}%</p>
                     <Slider
+                        className="overflow-visible"
                         isDisabled={isReadonly}
                         aria-label={`${event.name} Anomaly Enlightened percentage score`}
                         minValue={range ? range[0] : 0}
@@ -61,12 +62,12 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                         onChangeEnd={(value) => setSliderPredictionValue(Array.isArray(value) ? value[0] : value)}
                         onDoubleClick={() => { setSliderPredictionValue(50); setSliderDisplayValue(50); }}
                     >
-                        <Slider.Track className="bg-res !border-s-enl">
+                        <Slider.Track className="bg-res !border-s-enl overflow-visible">
                             <Slider.Fill className="bg-enl" />
                             <Slider.Thumb className={thumbClass} />
                             {actualMarkerPct != null && (
                                 <div
-                                    className="absolute top-1/2 -translate-y-1/2 w-1 h-4 bg-foreground rounded-full pointer-events-none"
+                                    className="absolute top-1/2 -translate-y-1/2 w-1 h-8 bg-amber-400 rounded-full pointer-events-none"
                                     style={{ left: `${actualMarkerPct}%` }}
                                 />
                             )}
