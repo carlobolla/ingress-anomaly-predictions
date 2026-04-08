@@ -16,17 +16,18 @@ router.get('/', async (_req: Request, res: Response) => {
 
 const parseIntervalMs = (interval: string): number => {
     let ms = 0;
-    const years  = interval.match(/(\d+)\s+years?/);
-    const months = interval.match(/(\d+)\s+mons?/);
-    const days   = interval.match(/(\d+)\s+days?/);
-    const time   = interval.match(/(\d+):(\d+):(\d+)/);
+    const years  = interval.match(/(-?\d+)\s+years?/);
+    const months = interval.match(/(-?\d+)\s+mons?/);
+    const days   = interval.match(/(-?\d+)\s+days?/);
+    const time   = interval.match(/(-?)(\d+):(\d+):(\d+)/);
     if (years)  ms += parseInt(years[1])  * 365 * 24 * 60 * 60 * 1000;
     if (months) ms += parseInt(months[1]) * 30  * 24 * 60 * 60 * 1000;
     if (days)   ms += parseInt(days[1])   * 24  * 60 * 60 * 1000;
     if (time) {
-        ms += parseInt(time[1]) * 60 * 60 * 1000;
-        ms += parseInt(time[2]) * 60 * 1000;
-        ms += parseInt(time[3]) * 1000;
+        const sign = time[1] === '-' ? -1 : 1;
+        ms += sign * parseInt(time[2]) * 60 * 60 * 1000;
+        ms += sign * parseInt(time[3]) * 60 * 1000;
+        ms += sign * parseInt(time[4]) * 1000;
     }
     return ms;
 };

@@ -1,54 +1,15 @@
 import { useEffect, useState } from "react";
-import { Avatar, Skeleton } from "@heroui/react";
+import { Skeleton } from "@heroui/react";
 import { Navbar } from "../components";
 import { Series, EventType } from "../types";
 import { LeaderboardEntry } from "../types/leaderboard";
 import Event from "../types/event";
 import api from "../api/axios";
 import useAuth from "../hooks/use_auth";
-
-interface ScoredPrediction {
-    id: number;
-    event: number;
-    event_name: string;
-    predicted_winner: string | null;
-    predicted_enl_score: number | null;
-    predicted_res_score: number | null;
-    score: number | null;
-    actual_winner: string | null;
-    actual_enl_score: number | null;
-    actual_res_score: number | null;
-}
-
-interface UserPosition {
-    position: number;
-    entry: LeaderboardEntry;
-}
-
-const factionStyle: Record<string, { label: string; color: string; bg: string }> = {
-    ENL: { label: "ENL", color: "text-enl-foreground", bg: "bg-enl/30" },
-    RES: { label: "RES", color: "text-res-foreground", bg: "bg-res/30" },
-};
-
-const displayName = (user: { username?: string; first_name: string; last_name?: string }) =>
-    user.username ? `@${user.username}` : [user.first_name, user.last_name].filter(Boolean).join(" ");
-
-const telegramHref = (user: { username?: string; telegram_id?: number }) =>
-    user.username ? `https://t.me/${user.username}` : user.telegram_id ? `tg://user?id=${user.telegram_id}` : "#";
-
-const formatPrediction = (p: ScoredPrediction) => {
-    if (p.predicted_enl_score != null && p.predicted_res_score != null) {
-        return `ENL ${p.predicted_enl_score}% - ${p.predicted_res_score}% RES`;
-    }
-    return p.predicted_winner ?? "-";
-};
-
-const formatActual = (p: ScoredPrediction) => {
-    if (p.actual_enl_score != null && p.actual_res_score != null) {
-        return `ENL ${p.actual_enl_score}% - ${p.actual_res_score}% RES`;
-    }
-    return p.actual_winner ?? "TBD";
-};
+import { ScoredPrediction, UserPosition } from "../components/leaderboard/leaderboard-helpers";
+import UserPositionCard from "../components/leaderboard/user-position-card";
+import ScoredPredictionsTable from "../components/leaderboard/scored-predictions-table";
+import LeaderboardRow from "../components/leaderboard/leaderboard-row";
 
 const PAGE_SIZE = 20;
 
@@ -152,55 +113,8 @@ const Leaderboard = () => {
                     </div>
                 ) : userPosition ? (
                     <div className="mb-8 space-y-3">
-                        {/* Position card */}
-                        <div className="flex items-center gap-4 rounded-lg border border-foreground/40 bg-foreground/5 px-4 py-3">
-                            <span className="w-6 text-right font-mono text-sm text-foreground/40 shrink-0">
-                                #{userPosition.position}
-                            </span>
-                            <Avatar size="sm" className={userPosition.entry.faction === "ENL" ? "ring-2 ring-enl shrink-0" : userPosition.entry.faction === "RES" ? "ring-2 ring-res shrink-0" : "shrink-0"}>
-                                <Avatar.Image src={userPosition.entry.photo_url} alt={userPosition.entry.first_name} />
-                                <Avatar.Fallback>{userPosition.entry.first_name?.[0]}</Avatar.Fallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0 flex items-center gap-2">
-                                <span className="font-medium text-sm truncate">{displayName(userPosition.entry)}</span>
-                                {userPosition.entry.faction && factionStyle[userPosition.entry.faction] && (
-                                    <span className={`shrink-0 text-xs font-mono px-1.5 py-0.5 rounded ${factionStyle[userPosition.entry.faction].color} ${factionStyle[userPosition.entry.faction].bg}`}>
-                                        {factionStyle[userPosition.entry.faction].label}
-                                    </span>
-                                )}
-                            </div>
-                            <span className="font-mono text-sm font-semibold shrink-0">
-                                {userPosition.entry.score} pts
-                            </span>
-                        </div>
-
-                        {/* Scored predictions */}
-                        {scoredPredictions.length > 0 && (
-                            <div className="rounded-lg border border-foreground/10 overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="border-b border-foreground/10 text-foreground/50 text-xs">
-                                            <th className="text-left px-4 py-2 font-medium">Event</th>
-                                            <th className="text-left px-4 py-2 font-medium">Predicted</th>
-                                            <th className="text-left px-4 py-2 font-medium">Actual</th>
-                                            <th className="text-right px-4 py-2 font-medium">Points</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {scoredPredictions.map((p) => (
-                                            <tr key={p.id} className="border-b border-foreground/5 last:border-0">
-                                                <td className="px-4 py-2 font-medium truncate max-w-[180px]">{p.event_name}</td>
-                                                <td className="px-4 py-2 text-foreground/70 font-mono text-xs">{formatPrediction(p)}</td>
-                                                <td className="px-4 py-2 text-foreground/70 font-mono text-xs">{formatActual(p)}</td>
-                                                <td className="px-4 py-2 text-right font-mono font-semibold">
-                                                    {p.score != null ? `${p.score} pts` : "-"}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <UserPositionCard userPosition={userPosition} />
+                        <ScoredPredictionsTable predictions={scoredPredictions} />
                     </div>
                 ) : null}
 
@@ -215,46 +129,14 @@ const Leaderboard = () => {
                     <p className="text-foreground/50 text-sm">No results yet for this series.</p>
                 ) : (
                     <div className="space-y-2">
-                        {entries.map((entry, index) => {
-                            const faction = entry.faction ? factionStyle[entry.faction] : null;
-                            return (
-                                <div
-                                    key={entry.user}
-                                    className={`flex items-center gap-4 rounded-lg border px-4 py-3 ${entry.user === user?.id ? "border-foreground/40 bg-foreground/5" : "border-foreground/10"}`}
-                                >
-                                    <span className="w-6 text-right font-mono text-sm text-foreground/40 shrink-0">
-                                        {offset + index + 1}
-                                    </span>
-
-                                    <Avatar size="sm" className={entry.faction === "ENL" ? "ring-2 ring-enl shrink-0" : entry.faction === "RES" ? "ring-2 ring-res shrink-0" : "shrink-0"}>
-                                        <Avatar.Image src={entry.photo_url} alt={entry.first_name} />
-                                        <Avatar.Fallback>{entry.first_name?.[0]}</Avatar.Fallback>
-                                    </Avatar>
-
-                                    <div className="flex-1 min-w-0 flex items-center gap-2">
-                                        <a
-                                            href={telegramHref(entry)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="font-medium text-sm truncate hover:underline underline-offset-2"
-                                        >
-                                            {displayName(entry)}
-                                        </a>
-                                        {faction && (
-                                            <span
-                                                className={`shrink-0 text-xs font-mono px-1.5 py-0.5 rounded ${faction.color} ${faction.bg}`}
-                                            >
-                                                {faction.label}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <span className="font-mono text-sm font-semibold shrink-0">
-                                        {entry.score} pts
-                                    </span>
-                                </div>
-                            );
-                        })}
+                        {entries.map((entry, index) => (
+                            <LeaderboardRow
+                                key={entry.user}
+                                entry={entry}
+                                rank={offset + index + 1}
+                                isCurrentUser={entry.user === user?.id}
+                            />
+                        ))}
                     </div>
                 )}
 

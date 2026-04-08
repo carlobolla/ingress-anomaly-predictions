@@ -39,7 +39,7 @@ const Scoring = () => {
                         <div className="rounded-lg border border-foreground/10 p-4">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="font-semibold">Global Challenge / First Saturdays</p>
+                                    <p className="font-semibold">Global Challenge / First Saturday</p>
                                     <p className="text-foreground/60 text-sm mt-1">Same format, but these events tend to finish very close to 50/50. You need to be precise to score well. Tolerance window: ±5%.</p>
                                 </div>
                                 <div className="text-right shrink-0">
@@ -115,7 +115,7 @@ const Scoring = () => {
                 </section>
 
                 <section className="mb-10">
-                    <h2 className="text-xl font-semibold mb-3">Global Challenge scoring</h2>
+                    <h2 className="text-xl font-semibold mb-3">Global Challenge / First Saturday scoring</h2>
                     <p className="text-foreground/70 text-sm mb-2">
                         Same principle, but the tolerance window shrinks to ±5% and the base score drops faster: you lose 12 points per 1% deviation.
                         Global Challenges typically end very close to 50/50, which makes the faction call especially dangerous.
@@ -171,7 +171,7 @@ const Scoring = () => {
                             <p className="text-foreground/60 text-sm">Up to 120 points each, with a forgiving ±20% window. A near-miss still scores, and a strong call opens a real gap over the competition.</p>
                         </div>
                         <div className="rounded-lg border border-foreground/10 p-4">
-                            <p className="font-semibold mb-1">Global Challenges</p>
+                            <p className="font-semibold mb-1">Global Challenges / First Saturdays</p>
                             <p className="text-foreground/60 text-sm">Fewer events, lower ceiling, but the ±5% window punishes vague guesses. Being precise here separates serious players from those who just pick roughly.</p>
                         </div>
                         <div className="rounded-lg border border-foreground/10 p-4">
