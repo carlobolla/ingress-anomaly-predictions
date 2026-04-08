@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Skeleton } from "@heroui/react";
-import { Navbar } from "../components";
-import { Series, EventType } from "../types";
-import { LeaderboardEntry } from "../types/leaderboard";
-import Event from "../types/event";
-import api from "../api/axios";
-import useAuth from "../hooks/use_auth";
-import { ScoredPrediction, UserPosition } from "../components/leaderboard/leaderboard-helpers";
-import UserPositionCard from "../components/leaderboard/user-position-card";
-import ScoredPredictionsTable from "../components/leaderboard/scored-predictions-table";
-import LeaderboardRow from "../components/leaderboard/leaderboard-row";
+import Navbar from '@/components/navbar/navbar';
+import Event, { type EventType } from '@/types/event';
+import type Series from '@/types/series';
+import { LeaderboardEntry } from '@/types/leaderboard';
+import api from '@/api/axios';
+import useAuth from '@/hooks/use_auth';
+import { ScoredPrediction, UserPosition } from '@/components/leaderboard/leaderboard-helpers';
+import UserPositionCard from '@/components/leaderboard/user-position-card';
+import ScoredPredictionsTable from '@/components/leaderboard/scored-predictions-table';
+import LeaderboardRow from '@/components/leaderboard/leaderboard-row';
 
 const PAGE_SIZE = 20;
 

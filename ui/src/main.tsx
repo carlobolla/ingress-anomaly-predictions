@@ -1,10 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from "react-router";
-import { Home, Leaderboard, NotFound, Predict, Scoring, Profile } from './pages'
+import Home from '@/pages/home';
+import Leaderboard from '@/pages/leaderboard';
+import NotFound from '@/pages/not_found';
+import Predict from '@/pages/predict';
+import Scoring from '@/pages/scoring';
+import Profile from '@/pages/profile';
 import './index.css'
-import { TelegramAuthProvider } from './context';
-import { ProtectedRoute } from './components';
+import TelegramAuthProvider from '@/context/telegram-auth-provider';
+import ProtectedRoute from '@/components/protected_route';
 
 export const App = () => {
   return (

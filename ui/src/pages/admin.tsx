@@ -1,4 +1,4 @@
-import { Navbar } from "../components";
+import Navbar from '@/components/navbar/navbar';
 import { Link } from "react-router";
 
 const Admin = () => {

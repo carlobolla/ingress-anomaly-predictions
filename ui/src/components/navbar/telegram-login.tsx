@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Button, Label, ListBox, Popover } from "@heroui/react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../../hooks";
+import useAuth from '@/hooks/use_auth';
 import UserAvatar from "./user-avatar";
 
 const TelegramLogin = () => {

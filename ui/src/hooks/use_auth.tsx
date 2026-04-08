@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { TelegramAuthContext } from '../context';
+import TelegramAuthContext from '@/context/telegram-auth-context';
 
 const useAuth = () => {
     const context = useContext(TelegramAuthContext);

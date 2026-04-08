@@ -1,6 +1,7 @@
-import { Event, PredictionData, Region } from "../../types";
-import RegionList from "./components/region-list";
-import { isPastCutoff } from "../../utils/cutoff";
+import Event, { Region } from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
+import RegionList from './components/region-list';
+import { isPastCutoff } from '@/utils/cutoff';
 import useMediaQuery from "../../hooks/use_media_query";
 
 type SkirmishEventsProps = {

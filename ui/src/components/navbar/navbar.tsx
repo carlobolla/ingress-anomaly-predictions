@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { TelegramLogin } from '../'
-import { NavbarLink } from "..";
+import TelegramLogin from './telegram-login';
+import NavbarLink from './navbar-link';
 import { Link } from "react-router";
-import { useAuth } from '../../hooks';
+import useAuth from '@/hooks/use_auth';
 
 const NAV_LINKS = [
   { text: 'Home', href: '/' },

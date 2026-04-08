@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@heroui/react";
-import { Navbar, UserAvatar } from "../components";
-import { useAuth } from "../hooks";
-import api from "../api/axios";
+import Navbar from '@/components/navbar/navbar';
+import UserAvatar from '@/components/navbar/user-avatar';
+import useAuth from '@/hooks/use_auth';
+import api from '@/api/axios';
 
 const factions = [
     {

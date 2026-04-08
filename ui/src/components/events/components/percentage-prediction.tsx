@@ -4,7 +4,8 @@ import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { useEffect, useMemo, useState } from 'react';
-import { Event, PredictionData } from '../../../types';
+import type Event from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
 
 dayjs.extend(LocalizedFormat);
 dayjs.extend(advancedFormat);

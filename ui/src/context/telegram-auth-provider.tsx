@@ -1,9 +1,10 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { TelegramAuthContext } from ".";
-import api from "../api/axios";
-import { User, TelegramResponse } from "../types";
-import { isTokenExpired } from "../utils/jwt";
+import TelegramAuthContext from "./telegram-auth-context";
+import api from '@/api/axios';
+import type User from '@/types/user';
+import type TelegramResponse from '@/types/telegram-response';
+import { isTokenExpired } from '@/utils/jwt';
 
 const TelegramAuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);

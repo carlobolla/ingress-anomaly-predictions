@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Navbar } from '../components';
+import Navbar from '@/components/navbar/navbar';
 import { Alert, Button, CloseButton, Modal, Skeleton } from '@heroui/react';
 import { useParams } from 'react-router';
-import { Event, PredictionData, EventType, Prediction, Series } from '../types';
-import api from '../api/axios';
-import EventsContainer from '../components/events-container';
+import Event, { type EventType } from '@/types/event';
+import type { PredictionData, Prediction } from '@/types/prediction';
+import type Series from '@/types/series';
+import api from '@/api/axios';
+import EventsContainer from '@/components/events-container';
 import { isPastCutoff } from '../utils/cutoff';
 
 const Predict = () => {

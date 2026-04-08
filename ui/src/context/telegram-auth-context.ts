@@ -1,5 +1,6 @@
 import { createContext } from 'react';
-import { User, TelegramResponse } from '../types';
+import type User from '@/types/user';
+import type TelegramResponse from '@/types/telegram-response';
 
 interface AuthContextType {
     user: User | null;

@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router";
-import { Series } from "../types";
+import type Series from '@/types/series';
 import { Button, Card, Skeleton } from "@heroui/react";
-import PlaceholderImg from '../assets/placeholder.jpg';
-import { useAuth } from "../hooks";
+import PlaceholderImg from '@/assets/placeholder.jpg';
+import useAuth from '@/hooks/use_auth';
 
 interface Props {
     series: Series;

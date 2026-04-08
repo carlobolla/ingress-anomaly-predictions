@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { useAuth } from '../hooks';
+import useAuth from '@/hooks/use_auth';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, verifyAuth } = useAuth();

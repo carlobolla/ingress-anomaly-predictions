@@ -1,8 +1,9 @@
 import { Link } from "@heroui/react"
-import { Navbar, SeriesCard } from "../components"
+import Navbar from '@/components/navbar/navbar';
+import SeriesCard from '@/components/series-card';
 import { useEffect, useState } from "react"
-import { Series } from "../types"
-import api from "../api/axios"
+import type Series from '@/types/series';
+import api from '@/api/axios';
 
 const Home = () => {
     const [series, setSeries] = useState([])

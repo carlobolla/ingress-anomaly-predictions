@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-import { PredictionData, Event } from "../../../types";
+import type Event from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { useState, useMemo, useEffect } from "react";

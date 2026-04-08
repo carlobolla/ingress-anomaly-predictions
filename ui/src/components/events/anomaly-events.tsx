@@ -1,7 +1,8 @@
-import { Event, PredictionData } from "../../types";
-import PercentagePrediction from "./components/percentage-prediction";
-import { isPastCutoff } from "../../utils/cutoff";
-import useMediaQuery from "../../hooks/use_media_query";
+import type Event from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
+import PercentagePrediction from './components/percentage-prediction';
+import { isPastCutoff } from '@/utils/cutoff';
+import useMediaQuery from '@/hooks/use_media_query';
 import dayjs from "dayjs";
 
 type AnomalyEventsProps = {

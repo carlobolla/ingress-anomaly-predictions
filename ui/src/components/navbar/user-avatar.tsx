@@ -1,6 +1,6 @@
 import { Avatar, Label, ListBox, Popover } from "@heroui/react"
 import { useNavigate } from "react-router"
-import { useAuth } from "../../hooks";
+import useAuth from '@/hooks/use_auth';
 
 const UserAvatar = ({size}: {size: "sm" | "lg"}) => {
     const navigate = useNavigate();

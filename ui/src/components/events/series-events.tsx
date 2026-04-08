@@ -1,7 +1,8 @@
-import { Event, PredictionData } from "../../types";
-import FactionOnly from "./components/faction-only";
-import { isPastCutoff } from "../../utils/cutoff";
-import useMediaQuery from "../../hooks/use_media_query";
+import type Event from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
+import FactionOnly from './components/faction-only';
+import { isPastCutoff } from '@/utils/cutoff';
+import useMediaQuery from '@/hooks/use_media_query';
 
 type SeriesEventsProps = {
     events: Event[];

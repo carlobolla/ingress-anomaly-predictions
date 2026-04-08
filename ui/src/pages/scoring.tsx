@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Navbar } from "../components"
+import Navbar from '@/components/navbar/navbar';
 
 const Scoring = () => {
     return (

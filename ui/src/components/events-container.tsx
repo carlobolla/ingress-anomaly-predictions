@@ -1,4 +1,5 @@
-import { EventType, Event, PredictionData } from "../types";
+import Event, { type EventType } from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
 import SeriesEvents from "./events/series-events";
 import AnomalyEvents from "./events/anomaly-events";
 import SkirmishEvents from "./events/skirmish-events";

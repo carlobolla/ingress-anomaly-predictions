@@ -1,5 +1,0 @@
-export type {default as Series} from './series'
-export {type default as Event, Region, type EventType} from './event'
-export {type PredictionData, type Prediction} from './prediction'
-export type {default as TelegramResponse} from './telegram-response'
-export type {default as User} from './user'

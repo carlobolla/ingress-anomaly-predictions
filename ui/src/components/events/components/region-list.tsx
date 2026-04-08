@@ -2,7 +2,8 @@ import { Card } from '@heroui/react';
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import SingleSite from './single-site';
-import { Event, PredictionData, Region } from '../../../types';
+import Event, { Region } from '@/types/event';
+import type { PredictionData } from '@/types/prediction';
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 
 dayjs.extend(LocalizedFormat);

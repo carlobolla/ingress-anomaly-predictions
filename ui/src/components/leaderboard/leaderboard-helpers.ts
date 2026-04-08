@@ -1,4 +1,4 @@
-import { LeaderboardEntry } from "../../types/leaderboard";
+import { LeaderboardEntry } from '@/types/leaderboard';
 
 export interface ScoredPrediction {
     id: number;

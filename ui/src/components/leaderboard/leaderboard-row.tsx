@@ -1,5 +1,5 @@
 import { Avatar } from "@heroui/react";
-import { LeaderboardEntry } from "../../types/leaderboard";
+import { LeaderboardEntry } from '@/types/leaderboard';
 import { factionStyle, displayName, telegramHref } from "./leaderboard-helpers";
 
 interface Props {
