@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import supabase from '../db/supabase';
+import { authenticate, requireAdmin, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -63,6 +64,16 @@ router.get('/types', async (_req: Request, res: Response) => {
     if (error) return res.status(500).json({ error: error.message });
     res.set('Cache-Control', 'public, max-age=3600');
     return res.json(data);
+});
+
+// POST /events/:id/score - admin only, triggers update_prediction_scores RPC
+router.post('/:id/score', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+
+    const { error } = await supabase.rpc('update_prediction_scores', { p_event_id: id });
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ success: true });
 });
 
 // GET /events/:id

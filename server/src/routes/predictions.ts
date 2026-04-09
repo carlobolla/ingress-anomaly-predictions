@@ -8,13 +8,14 @@ const router = Router();
 // Parse a PostgreSQL interval string (e.g. "24:00:00", "1 day", "1 day 02:00:00") to milliseconds
 function intervalToMs(interval: string): number {
     let ms = 0;
-    const dayMatch = interval.match(/(\d+)\s+days?/);
+    const dayMatch = interval.match(/(-?\d+)\s+days?/);
     if (dayMatch) ms += parseInt(dayMatch[1]) * 86400000;
-    const timeMatch = interval.match(/(\d+):(\d+):(\d+)/);
+    const timeMatch = interval.match(/(-?)(\d+):(\d+):(\d+)/);
     if (timeMatch) {
-        ms += parseInt(timeMatch[1]) * 3600000;
-        ms += parseInt(timeMatch[2]) * 60000;
-        ms += parseInt(timeMatch[3]) * 1000;
+        const sign = timeMatch[1] === '-' ? -1 : 1;
+        ms += sign * parseInt(timeMatch[2]) * 3600000;
+        ms += sign * parseInt(timeMatch[3]) * 60000;
+        ms += sign * parseInt(timeMatch[4]) * 1000;
     }
     return ms;
 }

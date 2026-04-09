@@ -18,9 +18,10 @@ interface Props {
     showEndTime?: boolean;
     range?: [number, number];
     actualScore?: number | null;
+    step?: 1 | 0.1;
 }
 
-const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction, showEndTime, range, actualScore }: Props) => {
+const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction, showEndTime, range, actualScore, step }: Props) => {
     const [sliderDisplayValue, setSliderDisplayValue] = useState<number>(prediction?.enl_score ?? 50);
     const [sliderPredictionValue, setSliderPredictionValue] = useState<number>(prediction?.enl_score ?? 50);
     const isReadonly = useMemo(() => readonly(event), [readonly, event]);
@@ -51,7 +52,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
             <Card.Content className="justify-between">
                 <div className="flex flex-row justify-between gap-3 items-center">
                     <p className={"text-enl transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}><span className="sm:hidden">ENL</span><span className="hidden sm:inline">Enlightened</span></p>
-                    <p className='w-[6em] text-center'>{sliderDisplayValue}%</p>
+                    <p className='w-[6em] text-center'>{step === 0.1 ? sliderDisplayValue.toFixed(1) : Math.round(sliderDisplayValue)}%</p>
                     <Slider
                         className="overflow-visible"
                         isDisabled={isReadonly}
@@ -62,6 +63,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                         onChange={(value) => setSliderDisplayValue(Array.isArray(value) ? value[0] : value)}
                         onChangeEnd={(value) => setSliderPredictionValue(Array.isArray(value) ? value[0] : value)}
                         onDoubleClick={() => { setSliderPredictionValue(50); setSliderDisplayValue(50); }}
+                        step={step ?? 1}
                     >
                         <Slider.Track className="bg-res !border-s-enl overflow-visible">
                             <Slider.Fill className="bg-enl" />
@@ -74,7 +76,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                             )}
                         </Slider.Track>
                     </Slider>
-                    <p className='w-[6em] text-center'>{100 - sliderDisplayValue}%</p>
+                    <p className='w-[6em] text-center'>{step === 0.1 ? (100 - sliderDisplayValue).toFixed(1) : Math.round(100 - sliderDisplayValue)}%</p>
                     <p className={"text-res transition-opacity " + (sliderDisplayValue >= 50 && 'opacity-25')}><span className="sm:hidden">RES</span><span className="hidden sm:inline">Resistance</span></p>
                 </div>
                 
