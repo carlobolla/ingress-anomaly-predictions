@@ -9,8 +9,9 @@ import Scoring from '@/pages/scoring';
 import Profile from '@/pages/profile';
 import './index.css'
 import TelegramAuthProvider from '@/context/telegram-auth-provider';
-import ProtectedRoute from '@/components/protected_route';
+import ProtectedRoute, { AdminRoute } from '@/components/protected_route';
 import Footer from '@/components/footer';
+import Admin from '@/pages/admin';
 
 export const App = () => {
   return (
@@ -23,6 +24,7 @@ export const App = () => {
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/scoring" element={<Scoring />} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TelegramAuthProvider>

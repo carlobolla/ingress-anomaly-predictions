@@ -19,4 +19,19 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
 };
 
+export const AdminRoute = ({ children }: { children: ReactNode }) => {
+    const { user, isAuthenticated, verifyAuth } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        verifyAuth().then(valid => {
+            if (!valid) navigate('/');
+        });
+    }, [verifyAuth, navigate]);
+
+    if (!isAuthenticated || user?.role !== 'admin') return null;
+
+    return <>{children}</>;
+};
+
 export default ProtectedRoute;
