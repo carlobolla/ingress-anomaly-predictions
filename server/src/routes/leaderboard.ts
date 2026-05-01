@@ -10,7 +10,7 @@ const parseParam = (raw: unknown, defaultVal: number): number => {
     return Number.isFinite(n) && n >= 0 ? n : defaultVal;
 };
 
-// GET /leaderboard?offset=0&limit=20 — authenticated, get leaderboard from leaderboard_global view
+// GET /leaderboard?offset=0&limit=20 - authenticated, get leaderboard from leaderboard_global view
 router.get('/', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
         const offset = parseParam(req.query.offset, 0);
@@ -28,7 +28,7 @@ router.get('/', authenticate, requireAdmin, async (req: AuthenticatedRequest, re
     }
 });
 
-// GET /leaderboard/:series/position — get a user's rank in a series leaderboard
+// GET /leaderboard/:series/position - get a user's rank in a series leaderboard
 router.get('/:series/position', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const { series } = req.params;
     const user = req.userId;
@@ -57,7 +57,7 @@ router.get('/:series/position', authenticate, async (req: AuthenticatedRequest, 
     }
 });
 
-// GET /leaderboard/:series?offset=0&limit=20 — get leaderboard from a series from leaderboard_by_series view
+// GET /leaderboard/:series?offset=0&limit=20 - get leaderboard from a series from leaderboard_by_series view
 router.get('/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const { series } = req.params;
     if (!series) return res.status(400).json({ error: 'Missing route param: series' });

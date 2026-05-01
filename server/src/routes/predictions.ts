@@ -20,7 +20,7 @@ function intervalToMs(interval: string): number {
     return ms;
 }
 
-// GET /predictions/series/:series/scored — get own predictions for a series with scores and actual event results
+// GET /predictions/series/:series/scored - get own predictions for a series with scores and actual event results
 router.get('/series/:series/scored', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -57,7 +57,7 @@ router.get('/series/:series/scored', authenticate, async (req: AuthenticatedRequ
     return res.json(result);
 });
 
-// GET /predictions/series/:series — get own predictions for a series
+// GET /predictions/series/:series - get own predictions for a series
 router.get('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -76,7 +76,7 @@ router.get('/series/:series', authenticate, async (req: AuthenticatedRequest, re
     return res.json(normalized);
 });
 
-// POST /predictions/series/:series — upsert predictions for events in a series
+// POST /predictions/series/:series - upsert predictions for events in a series
 // Body: array of { event, winner, enl_score, res_score }
 router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
@@ -143,7 +143,7 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
     return res.status(201).json({ saved: data, rejected });
 });
 
-// PUT /predictions/:id — update own prediction
+// PUT /predictions/:id - update own prediction
 router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -181,7 +181,7 @@ router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response
     return res.json(data);
 });
 
-// DELETE /predictions/series/:id — delete own prediction
+// DELETE /predictions/series/:id - delete own prediction
 router.delete('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });

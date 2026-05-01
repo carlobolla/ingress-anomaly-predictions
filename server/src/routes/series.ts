@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import supabase from '../db/supabase';
-import Series from '../types/series';
 
 const router = Router();
 

@@ -7,6 +7,7 @@ import authRouter from './routes/auth';
 import predictionsRouter from './routes/predictions';
 import usersRouter from './routes/users';
 import leaderboardRouter from './routes/leaderboard';
+import adminRouter from './routes/admin';
 
 if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set');
 
@@ -26,6 +27,7 @@ app.use('/auth', authRouter);
 app.use('/predictions', predictionsRouter);
 app.use('/users', usersRouter);
 app.use('/leaderboard', leaderboardRouter);
+app.use('/admin', adminRouter);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

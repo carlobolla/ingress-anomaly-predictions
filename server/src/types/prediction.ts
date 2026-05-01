@@ -20,3 +20,10 @@ export interface PredictionInput {
     enl_score: number;
     res_score: number;
 }
+
+export interface PredictionRow {
+    winner: string | null;
+    enl_score: number | null;
+    res_score: number | null;
+    score: number | null;
+}
