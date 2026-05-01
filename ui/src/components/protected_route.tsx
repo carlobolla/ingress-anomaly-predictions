@@ -26,15 +26,14 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         verifyAuth().then(valid => {
-            if (!valid) navigate('/');
+            if (!valid) { navigate('/'); return; }
+            const auth = sessionStorage.getItem('auth');
+            const token = auth ? JSON.parse(auth).token : null;
+            if (!token || getTokenRole(token) !== 'admin') navigate('/');
         });
     }, [verifyAuth, navigate]);
 
-    const auth = sessionStorage.getItem('auth');
-    const token = auth ? JSON.parse(auth).token : null;
-    const isAdmin = token ? getTokenRole(token) === 'admin' : false;
-
-    if (!isAuthenticated || !isAdmin) return null;
+    if (!isAuthenticated) return null;
 
     return <>{children}</>;
 };
