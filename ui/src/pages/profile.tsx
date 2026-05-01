@@ -26,26 +26,27 @@ const factions = [
 
 const Profile = () => {
     const { user, updateUser } = useAuth();
-    const [selected, setSelected] = useState<string | undefined>(user?.faction);
-    const [hidePhoto, setHidePhoto] = useState(user?.hide_picture ?? false);
+    const [form, setForm] = useState({
+        faction: user?.faction,
+        hide_picture: user?.hide_picture ?? false,
+        notifications: user?.notifications ?? true,
+    });
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const factionDirty = selected !== user?.faction;
-    const photoSettingDirty = hidePhoto !== (user?.hide_picture ?? false);
-    const isDirty = factionDirty || photoSettingDirty;
+    const isDirty =
+        form.faction !== user?.faction ||
+        form.hide_picture !== (user?.hide_picture ?? false) ||
+        form.notifications !== (user?.notifications ?? true);
 
     const handleSave = async () => {
         if (!isDirty) return;
         setSaving(true);
         setError(null);
         try {
-            const body: Record<string, unknown> = {};
-            if (factionDirty && selected) body.faction = selected;
-            if (photoSettingDirty) body.hide_picture = hidePhoto;
-            await api.patch('/users/me', body);
-            updateUser({ ...(factionDirty && selected ? { faction: selected } : {}), ...(photoSettingDirty ? { hide_picture: hidePhoto } : {}) });
+            await api.patch('/users/me', form);
+            updateUser(form);
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
         } catch {
@@ -70,11 +71,11 @@ const Profile = () => {
                     </p>
                     <div className="space-y-3">
                         {factions.map((f) => {
-                            const isSelected = selected === f.key;
+                            const isSelected = form.faction === f.key;
                             return (
                                 <button
                                     key={f.key}
-                                    onClick={() => setSelected(f.key)}
+                                    onClick={() => setForm(prev => ({ ...prev, faction: f.key }))}
                                     className={`w-full text-left rounded-lg border p-4 transition-colors ${
                                         isSelected
                                             ? `${f.border} ${f.bg}`
@@ -100,7 +101,7 @@ const Profile = () => {
                         Control what others see on the leaderboard.
                     </p>
                     <button
-                        onClick={() => setHidePhoto((v: boolean) => !v)}
+                        onClick={() => setForm(prev => ({ ...prev, hide_picture: !prev.hide_picture }))}
                         className="w-full text-left rounded-lg border border-foreground/10 hover:border-foreground/25 p-4 transition-colors"
                     >
                         <div className="flex items-center justify-between">
@@ -108,8 +109,29 @@ const Profile = () => {
                                 <p className="font-medium text-sm">Hide profile picture</p>
                                 <p className="text-foreground/60 text-sm mt-0.5">Show initials instead of your Telegram photo</p>
                             </div>
-                            <div className={`w-10 h-6 rounded-full transition-colors shrink-0 flex items-center px-0.5 ${hidePhoto ? "bg-foreground" : "bg-foreground/20"}`}>
-                                <div className={`w-5 h-5 rounded-full bg-background transition-transform ${hidePhoto ? "translate-x-4" : "translate-x-0"}`} />
+                            <div className={`w-10 h-6 rounded-full transition-colors shrink-0 flex items-center px-0.5 ${form.hide_picture ? "bg-foreground" : "bg-foreground/20"}`}>
+                                <div className={`w-5 h-5 rounded-full bg-background transition-transform ${form.hide_picture ? "translate-x-4" : "translate-x-0"}`} />
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div className="mb-6">
+                    <p className="font-semibold mb-1">Notifications</p>
+                    <p className="text-foreground/60 text-sm mb-4">
+                        Manage Telegram messages from the bot.
+                    </p>
+                    <button
+                        onClick={() => setForm(prev => ({ ...prev, notifications: !prev.notifications }))}
+                        className="w-full text-left rounded-lg border border-foreground/10 hover:border-foreground/25 p-4 transition-colors"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-sm">Enable notifications</p>
+                                <p className="text-foreground/60 text-sm mt-0.5">Receive Telegram messages about predictions and results</p>
+                            </div>
+                            <div className={`w-10 h-6 rounded-full transition-colors shrink-0 flex items-center px-0.5 ${form.notifications ? "bg-foreground" : "bg-foreground/20"}`}>
+                                <div className={`w-5 h-5 rounded-full bg-background transition-transform ${form.notifications ? "translate-x-4" : "translate-x-0"}`} />
                             </div>
                         </div>
                     </button>

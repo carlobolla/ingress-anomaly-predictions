@@ -6,7 +6,8 @@ interface User{
     photo_url: string,
     telegram_id: number,
     faction?: string,
-    hide_picture?: boolean
+    hide_picture?: boolean,
+    notifications?: boolean
 }
 
 export default User;

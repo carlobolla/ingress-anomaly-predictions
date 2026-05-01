@@ -8,7 +8,7 @@ const router = Router();
 // Body: { faction?: 'ENL' | 'RES', hide_picture?: boolean }
 router.patch('/me', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
-    const { faction, hide_picture } = req.body;
+    const { faction, hide_picture, notifications } = req.body;
 
     if (faction !== undefined && faction !== 'ENL' && faction !== 'RES') {
         return res.status(400).json({ error: 'faction must be ENL or RES' });
@@ -20,6 +20,7 @@ router.patch('/me', authenticate, async (req: AuthenticatedRequest, res: Respons
     const updates: Record<string, unknown> = { edited_at: new Date().toISOString() };
     if (faction !== undefined) updates.faction = faction;
     if (hide_picture !== undefined) updates.hide_picture = hide_picture;
+    if (notifications !== undefined) updates.notifications = notifications;
 
     const { data: user, error } = await supabase
         .from('user')
