@@ -18,11 +18,6 @@ export interface UserPosition {
     entry: LeaderboardEntry;
 }
 
-export const factionStyle: Record<string, { label: string; color: string; bg: string }> = {
-    ENL: { label: "ENL", color: "text-enl-foreground", bg: "bg-enl/30" },
-    RES: { label: "RES", color: "text-res-foreground", bg: "bg-res/30" },
-};
-
 export const displayName = (user: { username?: string; first_name: string; last_name?: string }) =>
     user.username ? `@${user.username}` : [user.first_name, user.last_name].filter(Boolean).join(" ");
 
