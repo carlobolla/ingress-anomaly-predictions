@@ -66,6 +66,20 @@ router.get('/types', async (_req: Request, res: Response) => {
     return res.json(data);
 });
 
+// GET /events/unscored - get events that have ended but predictions haven't been scored yet (admin only)
+router.get('/unscored', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
+    const { data, error } = await supabase
+        .from('event')
+        .select('id, name, series, end_time')
+        .lt('end_time', new Date().toISOString())
+        .not('enl_score', 'is', null)
+        .not('res_score', 'is', null)
+        .order('end_time', { ascending: true });
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json(data);
+});
+
 // POST /events/:id/score - admin only, triggers update_prediction_scores RPC
 router.post('/:id/score', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;

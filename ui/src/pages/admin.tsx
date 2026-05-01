@@ -11,7 +11,7 @@ const Admin = () => {
     const [loadingEvents, setLoadingEvents] = useState(true);
 
     useEffect(() => {
-        api.get<Event[]>('/admin/events')
+        api.get<Event[]>('/events/unscored')
             .then(res => setEvents(res.data))
             .catch(() => {})
             .finally(() => setLoadingEvents(false));
