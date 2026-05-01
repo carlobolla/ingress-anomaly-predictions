@@ -9,7 +9,7 @@ import Scoring from '@/pages/scoring';
 import Profile from '@/pages/profile';
 import './index.css'
 import TelegramAuthProvider from '@/context/telegram-auth-provider';
-import ProtectedRoute, { AdminRoute } from '@/components/protected_route';
+import { ProtectedRoute, AdminRoute } from '@/components/protected_route';
 import Footer from '@/components/footer';
 import Admin from '@/pages/admin';
 

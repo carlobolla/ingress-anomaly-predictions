@@ -1,8 +1,9 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import useAuth from '@/hooks/use_auth';
+import { getTokenRole } from '@/utils/jwt';
 
-const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, verifyAuth } = useAuth();
     const navigate = useNavigate();
     useEffect(() => {
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 };
 
 export const AdminRoute = ({ children }: { children: ReactNode }) => {
-    const { user, isAuthenticated, verifyAuth } = useAuth();
+    const { isAuthenticated, verifyAuth } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,9 +30,11 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
         });
     }, [verifyAuth, navigate]);
 
-    if (!isAuthenticated || user?.role !== 'admin') return null;
+    const auth = sessionStorage.getItem('auth');
+    const token = auth ? JSON.parse(auth).token : null;
+    const isAdmin = token ? getTokenRole(token) === 'admin' : false;
+
+    if (!isAuthenticated || !isAdmin) return null;
 
     return <>{children}</>;
 };
-
-export default ProtectedRoute;

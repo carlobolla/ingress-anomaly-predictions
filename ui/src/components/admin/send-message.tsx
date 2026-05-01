@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/api/axios';
 import FactionBadge from '@/components/faction-badge';
-
-interface AdminUser {
-    id: string;
-    first_name: string;
-    last_name: string | null;
-    username: string | null;
-    telegram_id: number;
-    faction: string | null;
-    role: string;
-}
+import User from '@/types/user';
 
 interface SendResult {
     sent: number;
@@ -19,16 +10,16 @@ interface SendResult {
 }
 
 const SendMessage = () => {
-    const [users, setUsers] = useState<AdminUser[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [selectedIds, setSelectedIds] = useState<Set<User['id']>>(new Set());
     const [text, setText] = useState('');
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<SendResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        api.get<AdminUser[]>('/admin/users')
+        api.get<User[]>('/admin/users')
             .then(res => setUsers(res.data))
             .catch(() => setError('Failed to load users.'))
             .finally(() => setLoading(false));
@@ -39,7 +30,7 @@ const SendMessage = () => {
     const toggleSelectAll = () =>
         setSelectedIds(allSelected ? new Set() : new Set(users.map(u => u.id)));
 
-    const toggleUser = (id: string) =>
+    const toggleUser = (id: User['id']) =>
         setSelectedIds(prev => {
             const next = new Set(prev);
             next.has(id) ? next.delete(id) : next.add(id);
