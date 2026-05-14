@@ -66,14 +66,25 @@ router.get('/types', async (_req: Request, res: Response) => {
     return res.json(data);
 });
 
-// GET /events/unscored - get events that have ended but predictions haven't been scored yet (admin only)
+// GET /events/unscored - get events that have results but at least one prediction hasn't been scored yet (admin only)
 router.get('/unscored', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
+    const { data: unscoredPreds, error: predsError } = await supabase
+        .from('prediction')
+        .select('event')
+        .is('score', null);
+
+    if (predsError) return res.status(500).json({ error: predsError.message });
+
+    const eventIds = [...new Set((unscoredPreds ?? []).map(p => p.event))];
+    if (eventIds.length === 0) return res.json([]);
+
     const { data, error } = await supabase
         .from('event')
         .select('id, name, series, end_time')
-        .not('enl_score', 'is', null)
-        .not('res_score', 'is', null)
+        .in('id', eventIds)
+        .or('enl_score.not.is.null,winner.not.is.null')
         .order('end_time', { ascending: true });
+
     if (error) return res.status(500).json({ error: error.message });
     return res.json(data);
 });
