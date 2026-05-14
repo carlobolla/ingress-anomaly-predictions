@@ -24,9 +24,7 @@ const NotifyScores = ({ events, loading }: Props) => {
         setResult(null);
         setError(null);
         try {
-            const res = await api.post<NotifyResult>('/admin/telegram/notify-scores', {
-                event_id: selectedEventId,
-            });
+            const res = await api.post<NotifyResult>(`/admin/events/${selectedEventId}/notify`);
             setResult(res.data);
         } catch (e: unknown) {
             const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error;
