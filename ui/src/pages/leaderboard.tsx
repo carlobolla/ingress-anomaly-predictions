@@ -69,6 +69,15 @@ const Leaderboard = () => {
             .finally(() => setLoadingEntries(false));
     }, [selectedSeriesId, offset]);
 
+    const entryRanks = entries.map((e, i, arr) => {
+        if (i === 0 || e.score < arr[i - 1].score) return offset + i + 1;
+        return -1; // placeholder for ties
+    }).map((r, i, arr) => {
+        if (r !== -1) return r;
+        for (let j = i - 1; j >= 0; j--) { if (arr[j] !== -1) return arr[j]; }
+        return offset + i + 1;
+    });
+
     return (
         <>
             <Navbar />
@@ -116,7 +125,7 @@ const Leaderboard = () => {
                             <LeaderboardRow
                                 key={entry.user}
                                 entry={entry}
-                                rank={offset + index + 1}
+                                rank={entryRanks[index]}
                                 isCurrentUser={entry.user === user?.id}
                             />
                         ))}
