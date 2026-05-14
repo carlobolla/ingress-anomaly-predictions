@@ -71,11 +71,9 @@ router.get('/unscored', authenticate, requireAdmin, async (_req: AuthenticatedRe
     const { data, error } = await supabase
         .from('event')
         .select('id, name, series, end_time')
-        .lt('end_time', new Date().toISOString())
         .not('enl_score', 'is', null)
         .not('res_score', 'is', null)
         .order('end_time', { ascending: true });
-
     if (error) return res.status(500).json({ error: error.message });
     return res.json(data);
 });
