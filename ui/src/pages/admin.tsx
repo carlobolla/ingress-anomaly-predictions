@@ -8,16 +8,18 @@ import type Event from '@/types/event';
 
 const Admin = () => {
     const [events, setEvents] = useState<Event[]>([]);
+    const [scoredEvents, setScoredEvents] = useState<Event[]>([]);
     const [loadingEvents, setLoadingEvents] = useState(true);
 
     useEffect(() => {
         api.get<Event[]>('/events/unscored')
-            .then(res => setEvents(res.data))
+            .then(res => {
+                setEvents(res.data);
+                setScoredEvents(res.data.filter(ev => ev.enl_score != null && ev.res_score != null));
+            })
             .catch(() => {})
             .finally(() => setLoadingEvents(false));
     }, []);
-
-    const scoredEvents = events.filter(ev => ev.enl_score != null || ev.res_score != null);
 
     return (
         <>
