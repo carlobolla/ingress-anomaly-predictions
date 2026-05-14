@@ -89,6 +89,30 @@ router.get('/unscored', authenticate, requireAdmin, async (_req: AuthenticatedRe
     return res.json(data);
 });
 
+// GET /events/scored - get events that have results and predictions scored (admin only)
+router.get('/scored', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
+    const { data: scoredPreds, error: predsError } = await supabase
+        .from('prediction')
+        .select('event')
+        .not('score', 'is', null);
+
+    if (predsError) return res.status(500).json({ error: predsError.message });
+
+    const eventIds = [...new Set((scoredPreds ?? []).map(p => p.event))];
+    if (eventIds.length === 0) return res.json([]);
+
+    const { data, error } = await supabase
+        .from('event')
+        .select('id, name, series, end_time')
+        .in('id', eventIds)
+        .or('enl_score.not.is.null,winner.not.is.null')
+        .order('end_time', { ascending: true });
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json(data);
+});
+
+
 // POST /events/:id/score - admin only, triggers update_prediction_scores RPC
 router.post('/:id/score', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
