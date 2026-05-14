@@ -12,13 +12,13 @@ const Admin = () => {
     const [loadingEvents, setLoadingEvents] = useState(true);
 
     useEffect(() => {
-        api.get<Event[]>('/events/unscored')
-            .then(res => {
-                setEvents(res.data);
-                setScoredEvents(res.data.filter(ev => ev.enl_score != null && ev.res_score != null));
-            })
-            .catch(() => {})
-            .finally(() => setLoadingEvents(false));
+        Promise.all([
+            api.get<Event[]>('/events/unscored').then(res => res.data).catch(() => []),
+            api.get<Event[]>('/events/scored').then(res => res.data).catch(() => []),
+        ]).then(([unscored, scored]) => {
+            setEvents(unscored);
+            setScoredEvents(scored);
+        }).finally(() => setLoadingEvents(false));
     }, []);
 
     return (
