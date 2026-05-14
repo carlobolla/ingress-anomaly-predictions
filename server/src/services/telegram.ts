@@ -33,16 +33,29 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
     if (!json.ok) throw new Error(json.description ?? 'Telegram error');
 }
 
-export async function sendTelegramMessages(recipients: Recipient[]): Promise<SendResult> {
-    const results = await Promise.allSettled(
-        recipients.map(async (r) => {
-            await sendTelegramMessage(r.telegram_id, r.message);
-            console.log(`[telegram] sent to ${r.first_name}${r.username ? ` (@${r.username})` : ''} (telegram_id: ${r.telegram_id})`);
-        })
-    );
+const CHUNK_SIZE = 25;
+const CHUNK_DELAY_MS = 1100;
 
-    const succeeded = results.filter(r => r.status === 'fulfilled').length;
-    const failed: SendResult['failed'] = results.flatMap((r, i) => {
+export async function sendTelegramMessages(recipients: Recipient[]): Promise<SendResult> {
+    const allResults: PromiseSettledResult<void>[] = [];
+
+    for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
+        const chunk = recipients.slice(i, i + CHUNK_SIZE);
+        const chunkResults = await Promise.allSettled(
+            chunk.map(async (r) => {
+                await sendTelegramMessage(r.telegram_id, r.message);
+                console.log(`[telegram] sent to ${r.first_name}${r.username ? ` (@${r.username})` : ''} (telegram_id: ${r.telegram_id})`);
+            })
+        );
+        allResults.push(...chunkResults);
+
+        if (i + CHUNK_SIZE < recipients.length) {
+            await new Promise(resolve => setTimeout(resolve, CHUNK_DELAY_MS));
+        }
+    }
+
+    const succeeded = allResults.filter(r => r.status === 'fulfilled').length;
+    const failed: SendResult['failed'] = allResults.flatMap((r, i) => {
         if (r.status === 'rejected') {
             const { telegram_id, first_name, username } = recipients[i];
             return [{ telegram_id, first_name, username, reason: (r as PromiseRejectedResult).reason?.message as string }];
