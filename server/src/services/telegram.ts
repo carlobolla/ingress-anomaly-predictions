@@ -99,9 +99,16 @@ export async function notifyEventResults(eventId: number): Promise<SendResult> {
     if (predError) throw new Error(predError.message);
     if (!predictions || predictions.length === 0) return { sent: 0, total: 0, failed: [] };
 
-    console.log(`[telegram] notifying ${predictions.length} user(s) about results for event #${eventId} "${event.name}"`);
+    const isPercentageType = PERCENTAGE_TYPES.has(event.type);
+    const activePredictions = predictions.filter(p =>
+        isPercentageType ? p.enl_score != null : p.winner != null
+    );
 
-    const recipients: Recipient[] = predictions.map((p) => {
+    if (activePredictions.length === 0) return { sent: 0, total: 0, failed: [] };
+
+    console.log(`[telegram] notifying ${activePredictions.length} user(s) about results for event #${eventId} "${event.name}"`);
+
+    const recipients: Recipient[] = activePredictions.map((p) => {
         const user = p.user as unknown as UserRow;
         return {
             ...user,
