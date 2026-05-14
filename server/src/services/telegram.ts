@@ -27,7 +27,7 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
     const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text }),
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
     });
     const json = await r.json() as { ok: boolean; description?: string };
     if (!json.ok) throw new Error(json.description ?? 'Telegram error');
@@ -58,6 +58,8 @@ export async function sendTelegramMessages(recipients: Recipient[]): Promise<Sen
     return { sent: succeeded, total: recipients.length, failed };
 }
 
+const NOTIFICATION_FOOTER = '\n\nYou may disable Telegram notifications by visiting your <a href="https://anomalypredictions.crlb.dev/profile">profile settings</a>.';
+
 function composeResultMessage(event: EventRow, prediction: PredictionRow, firstName: string, seriesName: string): string {
     const eventLabel = `${seriesName} - ${event.name}`;
     const scoreStr = prediction.score != null
@@ -67,17 +69,17 @@ function composeResultMessage(event: EventRow, prediction: PredictionRow, firstN
     if (PERCENTAGE_TYPES.has(event.type)) {
         const predText = prediction.enl_score != null
             ? `${prediction.enl_score}% ENL / ${100 - prediction.enl_score}% RES`
-            : '–';
+            : '-';
         const actualText = event.enl_score != null
             ? `${event.enl_score}% ENL / ${100 - event.enl_score}% RES`
             : 'not yet available';
-        return `Hi ${firstName}! Results are in for "${eventLabel}".\n\nYour prediction: ${predText}\nActual result: ${actualText}${scoreStr}`;
+        return `Hi ${firstName}! Results are in for "${eventLabel}".\n\nYour prediction: ${predText}\nActual result: ${actualText}${scoreStr}${NOTIFICATION_FOOTER}`;
     }
 
     // Winner-only (Series type 0, Skirmish type 3)
     const predWinner = prediction.winner ?? 'no prediction';
     const actualWinner = event.winner ?? 'not yet available';
-    return `Hi ${firstName}! Results are in for "${eventLabel}".\n\nYour prediction: ${predWinner}\nActual winner: ${actualWinner}${scoreStr}`;
+    return `Hi ${firstName}! Results are in for "${eventLabel}".\n\nYour prediction: ${predWinner}\nActual winner: ${actualWinner}${scoreStr}${NOTIFICATION_FOOTER}`;
 }
 
 export async function notifyEventResults(eventId: number): Promise<SendResult> {
