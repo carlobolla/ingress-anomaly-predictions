@@ -17,7 +17,7 @@ interface Props {
     prediction?: PredictionData;
     showEndTime?: boolean;
     range?: [number, number];
-    actualScore?: number | null;
+    actualScore?: { enl: number; res: number} | null;
     step?: 1 | 0.1;
 }
 
@@ -35,7 +35,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
     const thumbClass = sliderDisplayValue === 50 ? 'bg-foreground' : sliderDisplayValue > 50 ? 'bg-res' : 'bg-enl';
     const min = range ? range[0] : 0;
     const max = range ? range[1] : 100;
-    const actualMarkerPct = actualScore != null ? ((actualScore - min) / (max - min)) * 100 : null;
+    const actualMarkerPct = actualScore != null ? ((actualScore.enl - min) / (max - min)) * 100 : null;
 
     return (
         <Card className={isReadonly ? "cursor-not-allowed" : ""}>
@@ -82,7 +82,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
                 
                 {actualScore != null && (
                     <p className="text-sm mt-3 font-mono flex items-center justify-between">
-                        <span>Result: <span className="text-enl">{actualScore}% ENL</span> / <span className="text-res">RES {100 - actualScore}%</span></span>
+                        <span>Result: <span className="text-enl">{actualScore.enl}% ENL</span> / <span className="text-res">RES {actualScore.res}%</span></span>
                         {prediction?.score != null && <span className="font-semibold">{prediction.score} pts</span>}
                     </p>
                 )}

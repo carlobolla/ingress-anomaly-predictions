@@ -35,7 +35,6 @@ const FirstSaturdays = ({ events, handlePredictionChange, predictionData }: Firs
                         showEndTime
                         range={[40, 60]}
                         step={0.1}
-                        actualScore={event.enl_score}
                     />
                 ))}
             </div>

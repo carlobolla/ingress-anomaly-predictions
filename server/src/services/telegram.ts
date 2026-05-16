@@ -81,10 +81,10 @@ function composeResultMessage(event: EventRow, prediction: PredictionRow, firstN
 
     if (PERCENTAGE_TYPES.has(event.type)) {
         const predText = prediction.enl_score != null
-            ? `${prediction.enl_score}% ENL / ${100 - prediction.enl_score}% RES`
+            ? `${prediction.enl_score}% ENL / ${prediction.res_score}% RES`
             : '-';
         const actualText = event.enl_score != null
-            ? `${event.enl_score}% ENL / ${100 - event.enl_score}% RES`
+            ? `${event.enl_score}% ENL / ${event.res_score}% RES`
             : 'not yet available';
         return `Hi ${firstName}! Results are in for "${eventLabel}".\n\nYour prediction: ${predText}\nActual result: ${actualText}${scoreStr}${NOTIFICATION_FOOTER}`;
     }

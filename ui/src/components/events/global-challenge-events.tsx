@@ -33,7 +33,7 @@ const GlobalChallengeEvents = ({ events, handlePredictionChange, predictionData 
                         showEndTime
                         range={[40, 60]}
                         step={0.1}
-                        actualScore={event.enl_score}
+                        actualScore={event.enl_score != null && event.res_score != null ? { enl: event.enl_score, res: event.res_score } : null}
                     />
                 ))}
             </div>
