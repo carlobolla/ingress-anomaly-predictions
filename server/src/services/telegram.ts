@@ -34,7 +34,7 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
 }
 
 const CHUNK_SIZE = 25;
-const CHUNK_DELAY_MS = 1100;
+const CHUNK_DELAY_MS = 5000;
 
 export async function sendTelegramMessages(recipients: Recipient[]): Promise<SendResult> {
     const allResults: PromiseSettledResult<void>[] = [];
