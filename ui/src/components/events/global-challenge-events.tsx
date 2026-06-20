@@ -18,7 +18,7 @@ const GlobalChallengeEvents = ({ events, handlePredictionChange, predictionData 
         <>
             <div className="mb-5">
                 <p className="text-slate-400 flex items-center gap-2">
-                    Cutoff date for predictions is 24 hours before the event starts (Exceptionally, open until May 1st for Orion).
+                    Cutoff date for predictions is 24 hours before the event starts.
                     Limited to the range of 40-60%.
                 </p>
             </div>
