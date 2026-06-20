@@ -5,4 +5,5 @@ export interface EventRow {
     enl_score: number | null;
     res_score: number | null;
     winner: string | null;
+    notified_to_users: boolean | null;
 }

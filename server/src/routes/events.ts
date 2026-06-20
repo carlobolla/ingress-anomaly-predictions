@@ -89,16 +89,18 @@ router.get('/unscored', authenticate, requireAdmin, async (_req: AuthenticatedRe
     return res.json(data);
 });
 
-// GET /events/scored - get events that have results and predictions scored (admin only)
-router.get('/scored', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
-    const { data: scoredPreds, error: predsError } = await supabase
+// GET /events/notifiable - get events that can be notified to users (admin only)
+router.get('/notifiable', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
+    const { data: notifiableEvents, error: predsError } = await supabase
         .from('prediction')
         .select('event')
-        .not('score', 'is', null);
+        .neq('enl_score', null)
+        .neq('notified_to_users', false);
+        
 
     if (predsError) return res.status(500).json({ error: predsError.message });
 
-    const eventIds = [...new Set((scoredPreds ?? []).map(p => p.event))];
+    const eventIds = [...new Set((notifiableEvents ?? []).map(p => p.event))];
     if (eventIds.length === 0) return res.json([]);
 
     const { data, error } = await supabase

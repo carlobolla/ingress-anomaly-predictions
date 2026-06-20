@@ -98,7 +98,7 @@ function composeResultMessage(event: EventRow, prediction: PredictionRow, firstN
 export async function notifyEventResults(eventId: number): Promise<SendResult> {
     const { data: event, error: eventError } = await supabase
         .from('event')
-        .select('id, name, type, enl_score, res_score, winner, series(name)')
+        .select('id, name, type, enl_score, res_score, winner, notified_to_users, series(name)')
         .eq('id', eventId)
         .single();
 
@@ -131,5 +131,12 @@ export async function notifyEventResults(eventId: number): Promise<SendResult> {
         };
     });
 
-    return sendTelegramMessages(recipients);
+    const result = await sendTelegramMessages(recipients);
+
+    await supabase
+        .from('event')
+        .update({ notified_to_users: true })
+        .eq('id', eventId);
+
+    return result;
 }

@@ -14,10 +14,10 @@ const Admin = () => {
     useEffect(() => {
         Promise.all([
             api.get<Event[]>('/events/unscored').then(res => res.data).catch(() => []),
-            api.get<Event[]>('/events/scored').then(res => res.data).catch(() => []),
-        ]).then(([unscored, scored]) => {
+            api.get<Event[]>('/events/notifiable').then(res => res.data).catch(() => []),
+        ]).then(([unscored, notifiable]) => {
             setEvents(unscored);
-            setScoredEvents(scored);
+            setScoredEvents(notifiable);
         }).finally(() => setLoadingEvents(false));
     }, []);
 
