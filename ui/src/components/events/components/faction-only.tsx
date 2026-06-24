@@ -6,6 +6,7 @@ import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { useState, useMemo, useEffect } from "react";
 import { Card, Slider } from "@heroui/react";
 import { LockClosedIcon } from "@heroicons/react/24/solid";
+import { TrophyIcon } from "@heroicons/react/16/solid";
 
 dayjs.extend(LocalizedFormat);
 dayjs.extend(advancedFormat);
@@ -64,6 +65,15 @@ const PredictionFactionOnly = ({ event, onPredictionChange, readonly, prediction
                     </Slider>
                     <p className={"text-res transition-opacity " + (sliderDisplayValue <= 50 && 'opacity-25')}><span className="sm:hidden">RES</span><span className="hidden sm:inline">Resistance</span></p>
                 </div>
+                {event.winner != null && (
+                    <p className="text-sm mt-3 font-mono flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                            <TrophyIcon className="size-3" />
+                            <span className={event.winner === 'ENL' ? 'text-enl' : 'text-res'}>{event.winner}</span>
+                        </span>
+                        {prediction?.score != null && <span className="font-semibold">{prediction.score} pts</span>}
+                    </p>
+                )}
                 <p className="text-slate-400 text-sm mt-3">
                     {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndTime ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
                 </p>

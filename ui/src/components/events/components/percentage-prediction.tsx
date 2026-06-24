@@ -35,7 +35,7 @@ const PercentagePrediction = ({ event, onPredictionChange, readonly, prediction,
     const thumbClass = sliderDisplayValue === 50 ? 'bg-foreground' : sliderDisplayValue > 50 ? 'bg-res' : 'bg-enl';
     const min = range ? range[0] : 0;
     const max = range ? range[1] : 100;
-    const actualMarkerPct = actualScore != null ? ((actualScore.enl - min) / (max - min)) * 100 : null;
+    const actualMarkerPct = actualScore != null ? ((actualScore.enl - min) / (max - min)) * 100.0 : null;
 
     return (
         <Card className={isReadonly ? "cursor-not-allowed" : ""}>

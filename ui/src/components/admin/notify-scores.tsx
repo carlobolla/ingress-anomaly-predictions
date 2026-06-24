@@ -62,8 +62,8 @@ const NotifyScores = ({ events, loading }: Props) => {
                                     <p className="text-sm font-medium truncate">{ev.name}</p>
                                     <p className="text-xs text-foreground/50">
                                         {ev.region}
-                                        {ev.actual_winner && (
-                                            <> · winner: <span className={ev.actual_winner === 'ENL' ? 'text-enl-foreground' : 'text-res-foreground'}>{ev.actual_winner}</span></>
+                                        {ev.winner && (
+                                            <> · winner: <span className={ev.winner === 'ENL' ? 'text-enl-foreground' : 'text-res-foreground'}>{ev.winner}</span></>
                                         )}
                                     </p>
                                 </div>

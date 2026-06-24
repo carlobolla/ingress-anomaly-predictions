@@ -65,11 +65,11 @@ const SingleSite = ({ event, last, onPredictionChange, predictionData, readonly,
                             <p className="text-slate-400 text-sm">
                                 {`${dayjs(event.start_time).format('MMMM Do, YYYY @ HH:mm')}${showEndDate ? ` -> ${dayjs(event.end_time).format('MMMM Do, YYYY @ HH:mm')}` : ''}`}
                             </p>
-                            {event.actual_winner && (
+                            {event.winner && (
                                 <p className="text-sm font-mono flex items-center gap-2">
                                     <span className="flex items-center gap-1">
                                         <TrophyIcon className="size-3" />
-                                        <span className={event.actual_winner === 'ENL' ? 'text-enl' : 'text-res'}>{event.actual_winner}</span>
+                                        <span className={event.winner === 'ENL' ? 'text-enl' : 'text-res'}>{event.winner}</span>
                                     </span>
                                     {predictionData?.score != null && <span className="font-semibold">{predictionData.score} pts</span>}
                                 </p>
