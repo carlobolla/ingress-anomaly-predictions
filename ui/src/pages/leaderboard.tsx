@@ -28,7 +28,7 @@ const Leaderboard = () => {
 
     useEffect(() => {
         api.get("/series").then((res) => {
-            const data: Series[] = res.data;
+            const data: Series[] = [...res.data].sort((a, b) => b.id - a.id);
             setSeries(data);
             if (data.length > 0) setSelectedSeriesId(String(data[0].id));
             setLoadingSeries(false);
