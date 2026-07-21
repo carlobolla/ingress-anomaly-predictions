@@ -80,7 +80,7 @@ router.get('/unscored', authenticate, requireAdmin, async (_req: AuthenticatedRe
 
     const { data, error } = await supabase
         .from('event')
-        .select('id, name, series, end_time')
+        .select('id, name, type, region, series, end_time, enl_score, res_score, winner')
         .in('id', eventIds)
         .or('enl_score.not.is.null,winner.not.is.null')
         .order('end_time', { ascending: true });
@@ -116,7 +116,7 @@ router.get('/notifiable', authenticate, requireAdmin, async (_req: Authenticated
 
     const { data, error } = await supabase
         .from('event')
-        .select('id, name, series, end_time')
+        .select('id, name, type, region, series, end_time, enl_score, res_score, winner')
         .in('id', eventIds)
         .or('enl_score.not.is.null,winner.not.is.null')
         .eq('notified_to_users', false)

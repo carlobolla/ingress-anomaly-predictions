@@ -5,7 +5,7 @@ import type Event from '@/types/event';
 interface Props {
     events: Event[];
     loading: boolean;
-    onResultAdded: (eventId: number) => void;
+    onResultAdded: (event: Event) => void;
 }
 
 const FACTION_ONLY_TYPES = [0, 3]; // Series Winner, Skirmish
@@ -40,9 +40,9 @@ const AddEventResult = ({ events, loading, onResultAdded }: Props) => {
             const body = isFactionOnly
                 ? { winner }
                 : { enl_score: Number(enlScore), res_score: 100 - Number(enlScore), winner: Number(enlScore) === 50 ? null : Number(enlScore) > 50 ? 'ENL' : 'RES' };
-            await api.patch(`/events/${selectedEvent.id}/result`, body);
+            const res = await api.patch<Event>(`/events/${selectedEvent.id}/result`, body);
             setSuccess(true);
-            onResultAdded(selectedEvent.id);
+            onResultAdded({ ...selectedEvent, ...res.data });
             setSelectedEventId(null);
             setWinner(null);
             setEnlScore('');

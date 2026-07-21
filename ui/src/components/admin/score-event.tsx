@@ -5,9 +5,10 @@ import type Event from '@/types/event';
 interface Props {
     events: Event[];
     loading: boolean;
+    onScored: (event: Event) => void;
 }
 
-const ScoreEvent = ({ events, loading }: Props) => {
+const ScoreEvent = ({ events, loading, onScored }: Props) => {
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
     const [scoring, setScoring] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -15,12 +16,14 @@ const ScoreEvent = ({ events, loading }: Props) => {
 
     const handleScore = async () => {
         if (selectedEventId === null) return;
+        const scoredEvent = events.find(ev => ev.id === selectedEventId);
         setScoring(true);
         setSuccess(false);
         setError(null);
         try {
             await api.post(`/events/${selectedEventId}/score`);
             setSuccess(true);
+            if (scoredEvent) onScored(scoredEvent);
         } catch (e: unknown) {
             const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error;
             setError(msg ?? 'Failed to calculate scores.');

@@ -35,16 +35,30 @@ const Admin = () => {
                 <AddEventResult
                     events={pendingResultEvents}
                     loading={loadingEvents}
-                    onResultAdded={(eventId) => setPendingResultEvents(prev => prev.filter(ev => ev.id !== eventId))}
+                    onResultAdded={(event) => {
+                        setPendingResultEvents(prev => prev.filter(ev => ev.id !== event.id));
+                        setEvents(prev => prev.some(ev => ev.id === event.id) ? prev : [...prev, event]);
+                    }}
                 />
 
                 <div className="border-t border-foreground/10 my-10" />
 
-                <ScoreEvent events={events} loading={loadingEvents} />
+                <ScoreEvent
+                    events={events}
+                    loading={loadingEvents}
+                    onScored={(event) => {
+                        setEvents(prev => prev.filter(ev => ev.id !== event.id));
+                        setScoredEvents(prev => prev.some(ev => ev.id === event.id) ? prev : [...prev, event]);
+                    }}
+                />
 
                 <div className="border-t border-foreground/10 my-10" />
 
-                <NotifyScores events={scoredEvents} loading={loadingEvents} />
+                <NotifyScores
+                    events={scoredEvents}
+                    loading={loadingEvents}
+                    onNotified={(eventId) => setScoredEvents(prev => prev.filter(ev => ev.id !== eventId))}
+                />
 
                 <div className="border-t border-foreground/10 my-10" />
 

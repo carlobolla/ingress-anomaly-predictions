@@ -10,9 +10,10 @@ interface NotifyResult {
 interface Props {
     events: Event[];
     loading: boolean;
+    onNotified: (eventId: number) => void;
 }
 
-const NotifyScores = ({ events, loading }: Props) => {
+const NotifyScores = ({ events, loading, onNotified }: Props) => {
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
     const [notifying, setNotifying] = useState(false);
     const [result, setResult] = useState<NotifyResult | null>(null);
@@ -26,6 +27,7 @@ const NotifyScores = ({ events, loading }: Props) => {
         try {
             const res = await api.post<NotifyResult>(`/admin/events/${selectedEventId}/notify`);
             setResult(res.data);
+            onNotified(selectedEventId);
         } catch (e: unknown) {
             const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error;
             setError(msg ?? 'Failed to send score notifications.');
