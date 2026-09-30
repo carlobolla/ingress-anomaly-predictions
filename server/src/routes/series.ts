@@ -7,7 +7,8 @@ const router = Router();
 router.get('/', async (_req: Request, res: Response) => {
     const { data, error } = await supabase
         .from('series')
-        .select('*');
+        .select('*')
+        .order('id', { ascending: false });
 
     if (error) return res.status(500).json({ error: error.message });
     return res.json(data);
