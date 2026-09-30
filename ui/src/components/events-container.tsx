@@ -25,6 +25,8 @@ const EventsContainer = ({ events, type, handlePredictionChange, predictionData 
             return <SkirmishEvents events={events} handlePredictionChange={handlePredictionChange} predictionData={predictionData} />;
         case 4: // First Saturdays
             return <FirstSaturdays events={events} handlePredictionChange={handlePredictionChange} predictionData={predictionData} />;
+        case 6: // Shard Storms
+            return <SkirmishEvents events={events} handlePredictionChange={handlePredictionChange} predictionData={predictionData} />;
         default:
             return null;
     }

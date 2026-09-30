@@ -36,7 +36,7 @@ const SkirmishEvents = ({ events, handlePredictionChange, predictionData }: Skir
                                 .filter(event => predictionData && predictionData[event.id] !== undefined)
                                 .map(event => [event.id, predictionData![event.id] as PredictionData])
                         )}
-                        subtext="A draw or cancellation will result in no points for your prediction. Cutoff date for predictions is 24 days before the event starts."
+                        subtext="Cutoff date for predictions is 24 days before the event starts."
                         readonly={isPastCutoff}
                     />
                 </div>
