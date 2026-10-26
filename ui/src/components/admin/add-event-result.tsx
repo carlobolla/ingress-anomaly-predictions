@@ -8,7 +8,7 @@ interface Props {
     onResultAdded: (event: Event) => void;
 }
 
-const FACTION_ONLY_TYPES = [0, 3]; // Series Winner, Skirmish
+const PERCENTAGE_TYPES = [1, 2, 4]; // Global Challenge, Anomaly, First Saturdays; everything else is a minor event
 
 const AddEventResult = ({ events, loading, onResultAdded }: Props) => {
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
@@ -19,7 +19,7 @@ const AddEventResult = ({ events, loading, onResultAdded }: Props) => {
     const [error, setError] = useState<string | null>(null);
 
     const selectedEvent = events.find(ev => ev.id === selectedEventId) ?? null;
-    const isFactionOnly = selectedEvent != null && FACTION_ONLY_TYPES.includes(selectedEvent.type);
+    const isFactionOnly = selectedEvent != null && !PERCENTAGE_TYPES.includes(selectedEvent.type);
 
     const selectEvent = (id: number) => {
         setSelectedEventId(prev => (prev === id ? null : id));
@@ -38,7 +38,7 @@ const AddEventResult = ({ events, loading, onResultAdded }: Props) => {
         setError(null);
         try {
             const body = isFactionOnly
-                ? { winner }
+                ? { winner, enl_score: winner === 'ENL' ? 100 : 0, res_score: winner === 'ENL' ? 0 : 100 }
                 : { enl_score: Number(enlScore), res_score: 100 - Number(enlScore), winner: Number(enlScore) === 50 ? null : Number(enlScore) > 50 ? 'ENL' : 'RES' };
             const res = await api.patch<Event>(`/events/${selectedEvent.id}/result`, body);
             setSuccess(true);

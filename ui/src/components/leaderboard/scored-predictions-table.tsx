@@ -1,14 +1,17 @@
 import { ScoredPrediction } from "./leaderboard-helpers";
 
+// Percentage-based types: Global Challenge, Anomaly, First Saturdays. Everything else is a minor (winner-only) event.
+const PERCENTAGE_TYPES = [1, 2, 4];
+
 const formatPrediction = (p: ScoredPrediction) => {
-    if (p.predicted_enl_score != null && p.predicted_res_score != null) {
+    if (PERCENTAGE_TYPES.includes(p.event_type) && p.predicted_enl_score != null && p.predicted_res_score != null) {
         return `ENL ${p.predicted_enl_score}% - ${p.predicted_res_score}% RES`;
     }
     return p.predicted_winner ?? "-";
 };
 
 const formatActual = (p: ScoredPrediction) => {
-    if (p.actual_enl_score != null && p.actual_res_score != null) {
+    if (PERCENTAGE_TYPES.includes(p.event_type) && p.actual_enl_score != null && p.actual_res_score != null) {
         return `ENL ${p.actual_enl_score}% - ${p.actual_res_score}% RES`;
     }
     return p.actual_winner ?? "TBD";

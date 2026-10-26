@@ -30,18 +30,19 @@ router.get('/series/:series/scored', authenticate, async (req: AuthenticatedRequ
 
     const { data, error } = await supabase
         .from('prediction')
-        .select('id, event!inner(id, name, series, enl_score, res_score, winner), winner, enl_score, res_score, score, edited_at, created_at')
+        .select('id, event!inner(id, name, type, series, enl_score, res_score, winner), winner, enl_score, res_score, score, edited_at, created_at')
         .eq('event.series', series)
         .eq('user', userId);
 
     if (error) return res.status(500).json({ error: error.message });
 
     const result = data.map(p => {
-        const event = p.event as unknown as { id: number; name: string; series: number; enl_score: number | null; res_score: number | null; winner: string | null };
+        const event = p.event as unknown as { id: number; name: string; type: number; series: number; enl_score: number | null; res_score: number | null; winner: string | null };
         return {
             id: p.id,
             event: event.id,
             event_name: event.name,
+            event_type: event.type,
             predicted_winner: p.winner,
             predicted_enl_score: p.enl_score,
             predicted_res_score: p.res_score,

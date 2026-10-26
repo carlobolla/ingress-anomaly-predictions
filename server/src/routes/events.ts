@@ -131,7 +131,7 @@ router.get('/notifiable', authenticate, requireAdmin, async (_req: Authenticated
 // Body: { winner?: 'ENL' | 'RES' | null, enl_score?: number | null, res_score?: number | null }
 router.patch('/:id/result', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
-    const { winner, enl_score, res_score } = req.body as { winner?: string | null; enl_score?: number | null; res_score?: number | null };
+    let { winner, enl_score, res_score } = req.body as { winner?: string | null; enl_score?: number | null; res_score?: number | null };
 
     if (winner != null && winner !== 'ENL' && winner !== 'RES') {
         return res.status(400).json({ error: "winner must be 'ENL', 'RES', or null" });
@@ -144,6 +144,21 @@ router.patch('/:id/result', authenticate, requireAdmin, async (req: Authenticate
     }
     if (winner == null && enl_score == null && res_score == null) {
         return res.status(400).json({ error: 'At least one of winner, enl_score, or res_score is required' });
+    }
+
+    const { data: existing, error: existingError } = await supabase
+        .from('event')
+        .select('type')
+        .eq('id', id)
+        .single();
+    if (existingError || !existing) return res.status(404).json({ error: 'Event not found' });
+
+    // Minor (winner-only) events are always stored as 100/0 for the winning faction
+    const isMinor = ![1, 2, 4].includes(existing.type);
+    if (isMinor) {
+        if (winner == null) return res.status(400).json({ error: 'winner is required for minor events' });
+        enl_score = winner === 'ENL' ? 100 : 0;
+        res_score = winner === 'ENL' ? 0 : 100;
     }
 
     const { data, error } = await supabase

@@ -4,6 +4,7 @@ export interface ScoredPrediction {
     id: number;
     event: number;
     event_name: string;
+    event_type: number;
     predicted_winner: string | null;
     predicted_enl_score: number | null;
     predicted_res_score: number | null;
