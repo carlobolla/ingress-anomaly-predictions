@@ -104,26 +104,18 @@ router.get('/pending-results', authenticate, requireAdmin, async (_req: Authenti
 
 // GET /events/notifiable - get events that can be notified to users (admin only)
 router.get('/notifiable', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
-    const { data: scoredPreds, error: predsError } = await supabase
-        .from('prediction')
-        .select('event')
-        .not('score', 'is', null);
-
-    if (predsError) return res.status(500).json({ error: predsError.message });
-
-    const eventIds = [...new Set((scoredPreds ?? []).map(p => p.event as number))];
-    if (eventIds.length === 0) return res.json([]);
-
+    // Single query: inner-join predictions so only events with at least one scored prediction are returned
     const { data, error } = await supabase
         .from('event')
-        .select('id, name, type, region, series, end_time, enl_score, res_score, winner')
-        .in('id', eventIds)
+        .select('id, name, type, region, series, end_time, enl_score, res_score, winner, prediction!inner(id)')
+        .not('prediction.score', 'is', null)
+        .limit(1, { referencedTable: 'prediction' })
         .or('enl_score.not.is.null,winner.not.is.null')
         .eq('notified_to_users', false)
         .order('end_time', { ascending: true });
 
     if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
+    return res.json((data ?? []).map(({ prediction: _prediction, ...event }) => event));
 });
 
 
