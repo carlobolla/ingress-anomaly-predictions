@@ -19,9 +19,10 @@ const Admin = () => {
             api.get<Event[]>('/events/unscored').then(res => res.data).catch(() => []),
             api.get<Event[]>('/events/notifiable').then(res => res.data).catch(() => []),
         ]).then(([pendingResults, unscored, notifiable]) => {
-            setPendingResultEvents(pendingResults);
-            setEvents(unscored);
-            setScoredEvents(notifiable);
+            const asList = (d: unknown): Event[] => (Array.isArray(d) ? d : []);
+            setPendingResultEvents(asList(pendingResults));
+            setEvents(asList(unscored));
+            setScoredEvents(asList(notifiable));
         }).finally(() => setLoadingEvents(false));
     }, []);
 
