@@ -1,24 +1,12 @@
-import { Router, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import jwksClient from 'jwks-rsa';
-import supabase from '../db/supabase';
+import { SignJWT, createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from 'jose';
+import { createRouter } from '../env';
+import { getSupabase } from '../db/supabase';
+import { verifyToken } from '../middleware/auth';
 
-const router = Router();
+const router = createRouter();
 
-const jwks = jwksClient({
-    jwksUri: 'https://oauth.telegram.org/.well-known/jwks.json',
-    cache: true,
-    cacheMaxAge: 60 * 60 * 1000, // 1 hour
-});
-
-function getSigningKey(kid: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        jwks.getSigningKey(kid, (err, key) => {
-            if (err) return reject(err);
-            resolve(key!.getPublicKey());
-        });
-    });
-}
+// jose caches the fetched key set and refreshes it on an unknown kid
+const jwks = createRemoteJWKSet(new URL('https://oauth.telegram.org/.well-known/jwks.json'));
 
 interface TelegramOidcPayload {
     sub: string;
@@ -30,32 +18,34 @@ interface TelegramOidcPayload {
 
 // POST /auth/telegram
 // Body: { response: { id_token: string, user: object } }
-router.post('/telegram', async (req: Request, res: Response) => {
-    const { id_token } = req.body.response ?? {};
+router.post('/telegram', async (c) => {
+    const body = await c.req.json().catch(() => ({}));
+    const { id_token } = body.response ?? {};
 
     if (!id_token) {
-        return res.status(400).json({ error: 'Missing id_token' });
-    }
-
-    const decoded = jwt.decode(id_token, { complete: true });
-    if (!decoded || typeof decoded === 'string' || !decoded.header.kid) {
-        return res.status(401).json({ error: 'Invalid id_token format' });
+        return c.json({ error: 'Missing id_token' }, 400);
     }
 
     try {
-        const publicKey = await getSigningKey(decoded.header.kid);
+        if (!decodeProtectedHeader(id_token).kid) throw new Error('missing kid');
+    } catch {
+        return c.json({ error: 'Invalid id_token format' }, 401);
+    }
 
-        const botId = process.env.TELEGRAM_BOT_TOKEN!.split(':')[0];
+    try {
+        const botId = c.env.TELEGRAM_BOT_TOKEN.split(':')[0];
 
-        const payload = jwt.verify(id_token, publicKey, {
+        const { payload: verified } = await jwtVerify(id_token, jwks, {
             algorithms: ['RS256'],
             issuer: 'https://oauth.telegram.org',
             audience: botId,
-        }) as TelegramOidcPayload;
+        });
+        const payload = verified as unknown as TelegramOidcPayload;
 
         const [first_name, ...rest] = payload.name.split(' ');
         const last_name = rest.join(' ') || null;
 
+        const supabase = getSupabase(c.env);
         const { data: user, error } = await supabase
             .from('user')
             .upsert(
@@ -71,40 +61,41 @@ router.post('/telegram', async (req: Request, res: Response) => {
             .select()
             .single();
 
-        if (error) return res.status(500).json({ error: error.message });
+        if (error) return c.json({ error: error.message }, 500);
 
-        const token = jwt.sign(
-            { sub: user.id, telegram_id: Number(payload.id), role: user.role },
-            process.env.JWT_SECRET!,
-            { expiresIn: '48h' }
-        );
+        const token = await new SignJWT({ telegram_id: Number(payload.id), role: user.role })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setSubject(user.id)
+            .setIssuedAt()
+            .setExpirationTime('48h')
+            .sign(new TextEncoder().encode(c.env.JWT_SECRET));
 
-        return res.json({ token, user });
+        return c.json({ token, user });
     } catch {
-        return res.status(401).json({ error: 'Invalid or expired id_token' });
+        return c.json({ error: 'Invalid or expired id_token' }, 401);
     }
 });
 
 // GET /auth/me  (requires Authorization: Bearer <token>)
-router.get('/me', async (req: Request, res: Response) => {
-    const authHeader = req.headers.authorization;
+router.get('/me', async (c) => {
+    const authHeader = c.req.header('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Missing token' });
+        return c.json({ error: 'Missing token' }, 401);
     }
 
     try {
-        const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as { sub: string };
+        const payload = await verifyToken(authHeader.slice(7), c.env.JWT_SECRET);
 
-        const { data: user, error } = await supabase
+        const { data: user, error } = await getSupabase(c.env)
             .from('user')
             .select('*')
             .eq('id', payload.sub)
             .single();
 
-        if (error) return res.status(404).json({ error: error.message });
-        return res.json(user);
+        if (error) return c.json({ error: error.message }, 404);
+        return c.json(user);
     } catch {
-        return res.status(401).json({ error: 'Invalid token' });
+        return c.json({ error: 'Invalid token' }, 401);
     }
 });
 

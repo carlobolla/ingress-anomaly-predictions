@@ -1,56 +1,58 @@
-import { Router, Response } from 'express';
-import supabase from '../db/supabase';
-import { authenticate, requireAdmin, AuthenticatedRequest } from '../middleware/auth';
+import { createRouter } from '../env';
+import { getSupabase } from '../db/supabase';
+import { authenticate, requireAdmin } from '../middleware/auth';
 import { sendTelegramMessages, notifyEventResults } from '../services/telegram';
 
-const router = Router();
+const router = createRouter();
 
 // GET /admin/users - list all users
-router.get('/users', authenticate, requireAdmin, async (_req: AuthenticatedRequest, res: Response) => {
-    const { data, error } = await supabase
+router.get('/users', authenticate, requireAdmin, async (c) => {
+    const { data, error } = await getSupabase(c.env)
         .from('user')
         .select('id, first_name, last_name, username, telegram_id, faction, role')
         .eq('notifications', true)
         .order('username');
 
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
+    if (error) return c.json({ error: error.message }, 500);
+    return c.json(data);
 });
 
 // POST /admin/telegram/send
 // Body: { message: string, user_ids: string[] }
-router.post('/telegram/send', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
-    const { message, user_ids } = req.body as { message: string; user_ids: string[] };
+router.post('/telegram/send', authenticate, requireAdmin, async (c) => {
+    const { message, user_ids } = await c.req.json().catch(() => ({})) as { message: string; user_ids: string[] };
 
     if (!message || typeof message !== 'string' || !message.trim()) {
-        return res.status(400).json({ error: 'message is required' });
+        return c.json({ error: 'message is required' }, 400);
     }
     if (!user_ids || user_ids.length === 0) {
-        return res.status(400).json({ error: 'user_ids is required' });
+        return c.json({ error: 'user_ids is required' }, 400);
     }
 
-    const query = supabase.from('user').select('id, telegram_id, username, first_name').in('id', user_ids);
+    const { data: users, error } = await getSupabase(c.env)
+        .from('user')
+        .select('id, telegram_id, username, first_name')
+        .in('id', user_ids);
 
-    const { data: users, error } = await query;
-    if (error) return res.status(500).json({ error: error.message });
-    if (!users || users.length === 0) return res.status(404).json({ error: 'No users found' });
+    if (error) return c.json({ error: error.message }, 500);
+    if (!users || users.length === 0) return c.json({ error: 'No users found' }, 404);
 
     console.log(`[telegram] sending message to ${users.length} user(s): "${message.slice(0, 80)}${message.length > 80 ? '…' : ''}"`);
 
-    const result = await sendTelegramMessages(users.map(u => ({ ...u, message })));
-    return res.json(result);
+    const result = await sendTelegramMessages(c.env, users.map(u => ({ ...u, message })));
+    return c.json(result);
 });
 
 // POST /admin/events/:id/notify - send each user their result + prediction + score for an event
-router.post('/events/:id/notify', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
-    const eventId = parseInt(req.params.id, 10);
-    if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid event ID' });
+router.post('/events/:id/notify', authenticate, requireAdmin, async (c) => {
+    const eventId = parseInt(c.req.param('id'), 10);
+    if (isNaN(eventId)) return c.json({ error: 'Invalid event ID' }, 400);
 
     try {
-        const result = await notifyEventResults(eventId);
-        return res.json(result);
+        const result = await notifyEventResults(c.env, eventId);
+        return c.json(result);
     } catch (err) {
-        return res.status(500).json({ error: (err as Error).message });
+        return c.json({ error: (err as Error).message }, 500);
     }
 });
 

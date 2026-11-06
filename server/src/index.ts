@@ -1,6 +1,5 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
+import { cors } from 'hono/cors';
+import { createRouter } from './env';
 import eventsRouter from './routes/events';
 import seriesRouter from './routes/series';
 import authRouter from './routes/auth';
@@ -9,28 +8,26 @@ import usersRouter from './routes/users';
 import leaderboardRouter from './routes/leaderboard';
 import adminRouter from './routes/admin';
 
-if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set');
+const app = createRouter();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+app.use('*', cors({
+    origin: ['https://ap-dev.crlb.dev', 'https://anomalypredictions.crlb.dev'],
+    credentials: true,
+}));
 
-app.use(cors({ origin: ['https://ap-dev.crlb.dev', 'https://anomalypredictions.crlb.dev'], credentials: true }));
-app.use(express.json());
+app.get('/health', (c) => c.json({ status: 'ok' }));
 
-app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
-});
+app.route('/events', eventsRouter);
+app.route('/series', seriesRouter);
+app.route('/auth', authRouter);
+app.route('/predictions', predictionsRouter);
+app.route('/users', usersRouter);
+app.route('/leaderboard', leaderboardRouter);
+app.route('/admin', adminRouter);
 
-app.use('/events', eventsRouter);
-app.use('/series', seriesRouter);
-app.use('/auth', authRouter);
-app.use('/predictions', predictionsRouter);
-app.use('/users', usersRouter);
-app.use('/leaderboard', leaderboardRouter);
-app.use('/admin', adminRouter);
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.onError((err, c) => {
+    console.error(err);
+    return c.json({ error: 'Internal Server Error' }, 500);
 });
 
 export default app;

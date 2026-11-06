@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
-import supabase from '../db/supabase';
+import { createRouter } from '../env';
+import { getSupabase } from '../db/supabase';
 import { PredictionInput, Winner } from '../types/prediction';
-import { authenticate, AuthenticatedRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
-const router = Router();
+const router = createRouter();
 
 // Parse a PostgreSQL interval string (e.g. "24:00:00", "1 day", "1 day 02:00:00") to milliseconds
 function intervalToMs(interval: string): number {
@@ -21,20 +21,20 @@ function intervalToMs(interval: string): number {
 }
 
 // GET /predictions/series/:series/scored - get own predictions for a series with scores and actual event results
-router.get('/series/:series/scored', authenticate, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.userId;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+router.get('/series/:series/scored', authenticate, async (c) => {
+    const userId = c.get('userId');
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401);
 
-    const { series } = req.params;
-    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
+    const series = c.req.param('series');
+    if (!series) return c.json({ error: 'Missing route param: series' }, 400);
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase(c.env)
         .from('prediction')
         .select('id, event!inner(id, name, type, series, enl_score, res_score, winner), winner, enl_score, res_score, score, edited_at, created_at')
         .eq('event.series', series)
         .eq('user', userId);
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) return c.json({ error: error.message }, 500);
 
     const result = data.map(p => {
         const event = p.event as unknown as { id: number; name: string; type: number; series: number; enl_score: number | null; res_score: number | null; winner: string | null };
@@ -55,41 +55,43 @@ router.get('/series/:series/scored', authenticate, async (req: AuthenticatedRequ
         };
     });
 
-    return res.json(result);
+    return c.json(result);
 });
 
 // GET /predictions/series/:series - get own predictions for a series
-router.get('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.userId;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+router.get('/series/:series', authenticate, async (c) => {
+    const userId = c.get('userId');
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401);
 
-    const { series } = req.params;
-    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
+    const series = c.req.param('series');
+    if (!series) return c.json({ error: 'Missing route param: series' }, 400);
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase(c.env)
         .from('prediction')
         .select('*, event!inner(id, series)')
         .eq('event.series', series)
         .eq('user', userId);
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) return c.json({ error: error.message }, 500);
     const normalized = data.map(p => ({ ...p, event: (p.event as { id: number }).id }));
-    return res.json(normalized);
+    return c.json(normalized);
 });
 
 // POST /predictions/series/:series - upsert predictions for events in a series
 // Body: array of { event, winner, enl_score, res_score }
-router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.userId;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+router.post('/series/:series', authenticate, async (c) => {
+    const userId = c.get('userId');
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401);
 
-    const { series } = req.params;
-    if (!series) return res.status(400).json({ error: 'Missing route param: series' });
+    const series = c.req.param('series');
+    if (!series) return c.json({ error: 'Missing route param: series' }, 400);
 
-    const inputs: (PredictionInput & { event: number })[] = req.body;
+    const inputs: (PredictionInput & { event: number })[] = await c.req.json().catch(() => null);
     if (!Array.isArray(inputs) || inputs.length === 0) {
-        return res.status(400).json({ error: 'Body must be a non-empty array of predictions' });
+        return c.json({ error: 'Body must be a non-empty array of predictions' }, 400);
     }
+
+    const supabase = getSupabase(c.env);
 
     // Fetch start_times and prediction_cutoff for the submitted events
     const eventIds = inputs.map((p) => p.event);
@@ -98,7 +100,7 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
         .select('id, start_time, eventType(prediction_cutoff)')
         .in('id', eventIds);
 
-    if (eventsError) return res.status(500).json({ error: eventsError.message });
+    if (eventsError) return c.json({ error: eventsError.message }, 500);
 
     const eventMap = new Map<number, { start_time: Date; cutoffMs: number }>(
         (events ?? []).map((e) => [e.id, {
@@ -132,7 +134,7 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
     }
 
     if (rows.length === 0) {
-        return res.status(400).json({ error: 'All predictions are past the cutoff', rejected });
+        return c.json({ error: 'All predictions are past the cutoff', rejected }, 400);
     }
 
     const { data, error } = await supabase
@@ -140,19 +142,22 @@ router.post('/series/:series', authenticate, async (req: AuthenticatedRequest, r
         .upsert(rows, { onConflict: 'event,user' })
         .select();
 
-    if (error) return res.status(400).json({ error: error.message });
-    return res.status(201).json({ saved: data, rejected });
+    if (error) return c.json({ error: error.message }, 400);
+    return c.json({ saved: data, rejected }, 201);
 });
 
 // PUT /predictions/:id - update own prediction
-router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.userId;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+router.put('/:id', authenticate, async (c) => {
+    const userId = c.get('userId');
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401);
 
-    const { id } = req.params;
-    if (!id) return res.status(400).json({ error: 'Missing route param: id' });
+    const id = c.req.param('id');
+    if (!id) return c.json({ error: 'Missing route param: id' }, 400);
 
-    const body: Partial<PredictionInput> & { edited_at: string } = { ...req.body, edited_at: new Date().toISOString() };
+    const reqBody = await c.req.json().catch(() => ({}));
+    const body: Partial<PredictionInput> & { edited_at: string } = { ...reqBody, edited_at: new Date().toISOString() };
+
+    const supabase = getSupabase(c.env);
 
     // Fetch the event's start_time and prediction_cutoff via the prediction
     const { data: existing, error: fetchError } = await supabase
@@ -162,12 +167,12 @@ router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response
         .eq('user', userId)
         .single();
 
-    if (fetchError) return res.status(404).json({ error: 'Prediction not found' });
+    if (fetchError) return c.json({ error: 'Prediction not found' }, 404);
 
     const ev = existing.event as unknown as { start_time: string; eventType: { prediction_cutoff: string } };
     const cutoffMs = intervalToMs(ev.eventType.prediction_cutoff);
     if (new Date() >= new Date(new Date(ev.start_time).getTime() - cutoffMs)) {
-        return res.status(400).json({ error: 'Prediction is past the cutoff' });
+        return c.json({ error: 'Prediction is past the cutoff' }, 400);
     }
 
     const { data, error } = await supabase
@@ -178,26 +183,26 @@ router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response
         .select()
         .single();
 
-    if (error) return res.status(400).json({ error: error.message });
-    return res.json(data);
+    if (error) return c.json({ error: error.message }, 400);
+    return c.json(data);
 });
 
 // DELETE /predictions/series/:id - delete own prediction
-router.delete('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.userId;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+router.delete('/:id', authenticate, async (c) => {
+    const userId = c.get('userId');
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401);
 
-    const { id } = req.params;
-    if (!id) return res.status(400).json({ error: 'Missing route param: id' });
+    const id = c.req.param('id');
+    if (!id) return c.json({ error: 'Missing route param: id' }, 400);
 
-    const { error } = await supabase
+    const { error } = await getSupabase(c.env)
         .from('prediction')
         .delete()
         .eq('id', id)
         .eq('user', userId);
 
-    if (error) return res.status(400).json({ error: error.message });
-    return res.status(204).send();
+    if (error) return c.json({ error: error.message }, 400);
+    return c.body(null, 204);
 });
 
 export default router;

@@ -1,4 +1,5 @@
-import supabase from '../db/supabase';
+import { getSupabase } from '../db/supabase';
+import type { Bindings } from '../env';
 import { EventRow } from '../types/event';
 import { PredictionRow } from '../types/prediction';
 import { UserRow } from '../types/user';
@@ -20,8 +21,7 @@ export interface SendResult {
     failed: { telegram_id: number; first_name: string; username: string | null; reason: string }[];
 }
 
-async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
+async function sendTelegramMessage(token: string, chatId: number, text: string): Promise<void> {
     if (!token) throw new Error('TELEGRAM_BOT_TOKEN not configured');
 
     const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -36,14 +36,14 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
 const CHUNK_SIZE = 25;
 const CHUNK_DELAY_MS = 5000;
 
-export async function sendTelegramMessages(recipients: Recipient[]): Promise<SendResult> {
+export async function sendTelegramMessages(env: Bindings, recipients: Recipient[]): Promise<SendResult> {
     const allResults: PromiseSettledResult<void>[] = [];
 
     for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
         const chunk = recipients.slice(i, i + CHUNK_SIZE);
         const chunkResults = await Promise.allSettled(
             chunk.map(async (r) => {
-                await sendTelegramMessage(r.telegram_id, r.message);
+                await sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, r.telegram_id, r.message);
                 console.log(`[telegram] sent to ${r.first_name}${r.username ? ` (@${r.username})` : ''} (telegram_id: ${r.telegram_id})`);
             })
         );
@@ -95,7 +95,8 @@ function composeResultMessage(event: EventRow, prediction: PredictionRow, firstN
     return `Hi ${firstName}! Results are in for "${eventLabel}".\n\nYour prediction: ${predWinner}\nActual winner: ${actualWinner}${scoreStr}${NOTIFICATION_FOOTER}`;
 }
 
-export async function notifyEventResults(eventId: number): Promise<SendResult> {
+export async function notifyEventResults(env: Bindings, eventId: number): Promise<SendResult> {
+    const supabase = getSupabase(env);
     const { data: event, error: eventError } = await supabase
         .from('event')
         .select('id, name, type, enl_score, res_score, winner, notified_to_users, series(name)')
@@ -131,7 +132,7 @@ export async function notifyEventResults(eventId: number): Promise<SendResult> {
         };
     });
 
-    const result = await sendTelegramMessages(recipients);
+    const result = await sendTelegramMessages(env, recipients);
 
     await supabase
         .from('event')

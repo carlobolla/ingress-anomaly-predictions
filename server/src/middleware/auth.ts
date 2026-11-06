@@ -1,28 +1,30 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-export interface AuthenticatedRequest extends Request {
-    userId?: string;
-    userRole?: string;
-}
+import { createMiddleware } from 'hono/factory';
+import { jwtVerify } from 'jose';
+import type { AppEnv } from '../env';
 
-export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const auth = req.headers.authorization;
+export const verifyToken = async (token: string, secret: string) => {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), { algorithms: ['HS256'] });
+    return payload as { sub: string; role?: string };
+};
+
+export const authenticate = createMiddleware<AppEnv>(async (c, next) => {
+    const auth = c.req.header('Authorization');
     if (!auth?.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return c.json({ error: 'Unauthorized' }, 401);
     }
 
     try {
-        const payload = jwt.verify(auth.slice(7), process.env.JWT_SECRET!) as { sub: string; role?: string };
-        req.userId = payload.sub;
-        req.userRole = payload.role;
-        next();
-    } catch (err) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        const payload = await verifyToken(auth.slice(7), c.env.JWT_SECRET);
+        c.set('userId', payload.sub);
+        c.set('userRole', payload.role);
+    } catch {
+        return c.json({ error: 'Unauthorized' }, 401);
     }
-};
+    await next();
+});
 
-export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
-    if (req.userRole !== 'admin') return res.status(403).json({ error: 'Forbidden' });
-    next();
-};
+export const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
+    if (!c.get('userId')) return c.json({ error: 'Unauthorized' }, 401);
+    if (c.get('userRole') !== 'admin') return c.json({ error: 'Forbidden' }, 403);
+    await next();
+});
